@@ -25,6 +25,7 @@
 #include "Program.h"
 #include "Shape.h"
 #include "Component.h"
+#include <inc/Kinect.h>
 
 using namespace std;
 
@@ -37,6 +38,9 @@ shared_ptr<Component> root;
 static vector<shared_ptr<Component>> dfsOrder;
 static int pos = 0;
 static vector<int> spinners = { 2, 5 };
+
+IKinectSensor* sensor = nullptr;
+IBodyFrameReader* bodyFrameReader = nullptr;
 
 #define MAX_LOADSTRING 100
 
