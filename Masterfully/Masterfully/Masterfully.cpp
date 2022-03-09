@@ -41,7 +41,7 @@ static vector<int> spinners = { 2, 5 };
 
 IKinectSensor* sensor = nullptr;
 IBodyFrameReader* bodyFrameReader = nullptr;
-
+HRESULT hr;
 #define MAX_LOADSTRING 100
 
 // Global Variables:
@@ -54,6 +54,15 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+
+template<class Interface>
+static inline void safeRelease(Interface*& interfaceToRelease)
+{
+	if (interfaceToRelease != nullptr) {
+		interfaceToRelease->Release();
+		interfaceToRelease = nullptr;
+	}
+}
 
 static void error_callback(int error, const char* description)
 {
@@ -188,6 +197,79 @@ static void init()
 
 static void render()
 {
+	IBodyFrame* bodyFrame = nullptr;
+	hr = bodyFrameReader->AcquireLatestFrame(&bodyFrame);
+	vector<Joint*> bodyJoints;
+
+	if (SUCCEEDED(hr)) {
+		IBody* bodies[BODY_COUNT] = { 0 };
+		hr = bodyFrame->GetAndRefreshBodyData(_countof(bodies), bodies);
+
+		if (SUCCEEDED(hr)) {
+			//processBodies(BODY_COUNT, bodies);
+			for (unsigned int bodyIndex = 0; bodyIndex < BODY_COUNT; bodyIndex++) {
+				IBody* body = bodies[bodyIndex];
+
+				//Get the tracking status for the body, if it's not tracked we'll skip it
+				BOOLEAN isTracked = false;
+				HRESULT hr = body->get_IsTracked(&isTracked);
+				if (FAILED(hr) || isTracked == false) {
+					continue;
+				}
+
+				//If we're here the body is tracked so lets get the joint properties for this skeleton
+				Joint joints[JointType_Count];
+				hr = body->GetJoints(_countof(joints), joints);
+				if (SUCCEEDED(hr)) {
+					bodyJoints.push_back(joints);
+					//Let's print the head's position
+					const CameraSpacePoint& headPos = joints[JointType_Head].Position;
+					const CameraSpacePoint& leftHandPos = joints[JointType_HandLeft].Position;
+
+					//Let's check if the use has his hand up
+					if (leftHandPos.Y >= headPos.Y) {
+						std::cout << "LEFT HAND UP!!\n";
+					}
+
+					HandState leftHandState;
+					hr = body->get_HandLeftState(&leftHandState);
+					if (SUCCEEDED(hr)) {
+						if (leftHandState == HandState_Closed) {
+							std::cout << "CLOSED HAND\n";
+						}
+						else if (leftHandState == HandState_Open) {
+							std::cout << "OPEN HAND\n";
+						}
+						else if (leftHandState == HandState_Lasso) {
+							std::cout << "PEW PEW HANDS\n";
+						}
+						else if (leftHandState == HandState_NotTracked) {
+							std::cout << "HAND IS NOT TRACKED\n";
+						}
+						else if (leftHandState == HandState_Unknown) {
+							std::cout << "HANDS STATE IS UNKNOWN\n";
+						}
+					}
+				}
+			}
+			//After body processing is done, we're done with our bodies so release them.
+			for (unsigned int bodyIndex = 0; bodyIndex < _countof(bodies); bodyIndex++) {
+				safeRelease(bodies[bodyIndex]);
+			}
+
+			safeRelease(bodyFrame);
+		}
+	}
+	else if (sensor) {
+		BOOLEAN isSensorAvailable = false;
+		hr = sensor->get_IsAvailable(&isSensorAvailable);
+		if (SUCCEEDED(hr) && isSensorAvailable == false) {
+			std::cerr << "No available sensor is found.\n";
+		}
+	}
+	else {
+		std::cerr << "Trouble reading the body frame.\n";
+	}
 	// Get current frame buffer size.
 	int width, height;
 	glfwGetFramebufferSize(window, &width, &height);
@@ -279,6 +361,32 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: Place code here.
+	//Get the default Kinect sensor
+	hr = GetDefaultKinectSensor(&sensor);
+
+	//If the function succeeds, open the sensor
+	if (SUCCEEDED(hr)) {
+		hr = sensor->Open();
+
+		if (SUCCEEDED(hr)) {
+			//Get a body frame source from which we can get our body frame reader
+			IBodyFrameSource* bodyFrameSource = nullptr;
+			hr = sensor->get_BodyFrameSource(&bodyFrameSource);
+
+			if (SUCCEEDED(hr)) {
+				hr = bodyFrameSource->OpenReader(&bodyFrameReader);
+			}
+
+			//We're done with bodyFrameSource, so we'll release it
+			safeRelease(bodyFrameSource);
+		}
+	}
+
+	if (sensor == nullptr || FAILED(hr)) {
+		std::cerr << "Cannot find any sensors.\n";
+		return E_FAIL;
+	}
+	cout << "test" << endl;
     test();
 
     // Initialize global strings
