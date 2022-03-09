@@ -4,6 +4,40 @@
 #include "framework.h"
 #include "Masterfully.h"
 
+#define _USE_MATH_DEFINES
+#define PI 3.14159265
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <stack>
+
+
+#define GLEW_STATIC
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
+#define GLM_FORCE_RADIANS
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include "GLSL.h"
+#include "MatrixStack.h"
+#include "Program.h"
+#include "Shape.h"
+#include "Component.h"
+
+using namespace std;
+
+GLFWwindow* window; // Main application window
+string RES_DIR = "./resources"; // Where data files live
+shared_ptr<Program> prog;
+shared_ptr<Shape> shape;
+shared_ptr<Shape> sphere;
+shared_ptr<Component> root;
+static vector<shared_ptr<Component>> dfsOrder;
+static int pos = 0;
+static vector<int> spinners = { 2, 5 };
+
 #define MAX_LOADSTRING 100
 
 // Global Variables:
@@ -17,6 +51,221 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
+static void error_callback(int error, const char* description)
+{
+	cerr << description << endl;
+}
+
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window, GL_TRUE);
+	}
+}
+
+void character_callback(GLFWwindow* window, unsigned int codepoint)
+{
+	if (codepoint == 46) { ++pos; pos = pos % dfsOrder.size(); } // .
+	if (codepoint == 44) { --pos; if (pos == -1) pos = dfsOrder.size() - 1; pos = pos % dfsOrder.size(); } // ,
+	if (codepoint == 120) { dfsOrder[pos]->ang += glm::vec3(0.1, 0, 0); } // x
+	if (codepoint == 88) { dfsOrder[pos]->ang += glm::vec3(-0.1, 0, 0); } // X
+	if (codepoint == 121) { dfsOrder[pos]->ang += glm::vec3(0, 0.1, 0); } // y
+	if (codepoint == 89) { dfsOrder[pos]->ang += glm::vec3(0, -0.1, 0); } // Y
+	if (codepoint == 122) { dfsOrder[pos]->ang += glm::vec3(0, 0, 0.1); } // z
+	if (codepoint == 90) { dfsOrder[pos]->ang += glm::vec3(0, 0, -0.1); } // Z
+}
+
+static void init()
+{
+	GLSL::checkVersion();
+
+	// Set background color.
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	// Enable z-buffer test.
+	glEnable(GL_DEPTH_TEST);
+
+	// Initialize mesh.
+	shape = make_shared<Shape>();
+	shape->loadMesh(RES_DIR + "cube.obj");
+	shape->init();
+
+	sphere = make_shared<Shape>();
+	sphere->loadMesh(RES_DIR + "sphere.obj");
+	sphere->init();
+
+
+	// Initialize the GLSL program.
+	prog = make_shared<Program>();
+	prog->setVerbose(true);
+	prog->setShaderNames(RES_DIR + "simple_vert.glsl", RES_DIR + "simple_frag.glsl");
+	prog->init();
+	prog->addUniform("P");
+	prog->addUniform("MV");
+	prog->addAttribute("aPos");
+	prog->addAttribute("aNor");
+	prog->setVerbose(false);
+
+	// initialize root component
+	root = make_shared<Component>("root");
+	root->scale = glm::vec3(2, 3, 1);
+
+	auto head = make_shared<Component>("head");
+	head->tp = glm::vec3(0, 1.5, 0);
+	head->tm = glm::vec3(0, 0.6, 0);
+	head->scale = glm::vec3(1.2, 1.2, 1.2);
+	root->addComponent(head);
+
+	auto larm = make_shared<Component>("left arm");
+	larm->tp = glm::vec3(-1, 1.15, 0);
+	larm->tm = glm::vec3(0, -1, 0);
+	larm->scale = glm::vec3(0.5, 2, 0.5);
+	larm->ang = glm::vec3(0, 0, -0.5 * PI);
+	auto llarm = make_shared<Component>("lower left arm");
+	llarm->tp = glm::vec3(0, -2, 0);
+	llarm->tm = glm::vec3(0, -0.75, 0);
+	llarm->scale = glm::vec3(0.4, 1.5, 0.4);
+	larm->addComponent(llarm);
+	root->addComponent(larm);
+
+	auto rarm = make_shared<Component>("right arm");
+	rarm->tp = glm::vec3(1, 1.15, 0);
+	rarm->tm = glm::vec3(0, -1, 0);
+	rarm->scale = glm::vec3(0.5, 2, 0.5);
+	rarm->ang = glm::vec3(0, 0, 0.5 * PI);
+	auto lrarm = make_shared<Component>("lower right arm");
+	lrarm->tp = glm::vec3(0, -2, 0);
+	lrarm->tm = glm::vec3(0, -0.75, 0);
+	lrarm->scale = glm::vec3(0.4, 1.5, 0.4);
+	rarm->addComponent(lrarm);
+	root->addComponent(rarm);
+
+	auto lleg = make_shared<Component>("left leg");
+	lleg->tp = glm::vec3(-0.5, -1.5, 0);
+	lleg->tm = glm::vec3(0, -1.125, 0);
+	lleg->scale = glm::vec3(0.9, 2.25, 0.9);
+	auto llleg = make_shared<Component>("lower left leg");
+	llleg->tp = glm::vec3(0, -2.25, 0);
+	llleg->tm = glm::vec3(0, -1, 0);
+	llleg->scale = glm::vec3(0.8, 2, 0.8);
+	lleg->addComponent(llleg);
+	root->addComponent(lleg);
+
+	auto rleg = make_shared<Component>("right leg");
+	rleg->tp = glm::vec3(0.5, -1.5, 0);
+	rleg->tm = glm::vec3(0, -1.125, 0);
+	rleg->scale = glm::vec3(0.9, 2.25, 0.9);
+	auto lrleg = make_shared<Component>("lower right leg");
+	lrleg->tp = glm::vec3(0, -2.25, 0);
+	lrleg->tm = glm::vec3(0, -1, 0);
+	lrleg->scale = glm::vec3(0.8, 2, 0.8);
+	rleg->addComponent(lrleg);
+	root->addComponent(rleg);
+
+
+	if (root->children.size() > 0) {
+		stack<shared_ptr<Component>> frontier;
+		frontier.push(root);
+		while (!frontier.empty()) {
+			shared_ptr<Component> cur = frontier.top();
+			frontier.pop();
+			dfsOrder.push_back(cur);
+			int sz = cur->children.size();
+			for (int i = sz - 1; i >= 0; --i) {
+				frontier.push(cur->children[i]);
+			}
+		}
+	}
+
+	// If there were any OpenGL errors, this will print something.
+	// You can intersperse this line in your code to find the exact location
+	// of your OpenGL error.
+	GLSL::checkError(GET_FILE_LINE);
+}
+
+static void render()
+{
+	// Get current frame buffer size.
+	int width, height;
+	glfwGetFramebufferSize(window, &width, &height);
+	float aspect = width / (float)height;
+	glViewport(0, 0, width, height);
+
+	// Clear framebuffer.
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Create matrix stacks.
+	auto P = make_shared<MatrixStack>();
+	auto MV = make_shared<MatrixStack>();
+	// Apply projection.
+	P->pushMatrix();
+	P->multMatrix(glm::perspective((float)(45.0 * M_PI / 180.0), aspect, 0.01f, 100.0f));
+	// Apply camera transform.
+	MV->pushMatrix();
+	MV->translate(glm::vec3(0, 1, -12));
+
+	// Draw mesh using GLSL.
+	prog->bind();
+	glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, &P->topMatrix()[0][0]);
+	double t = glfwGetTime();
+	double mod = 1 + (0.05 / 2) + (0.05 / 2) * sin(2 * PI * 2 * t);
+	root->draw(MV, prog, shape, sphere, dfsOrder[pos], mod, dfsOrder, spinners);
+	prog->unbind();
+
+	// Pop matrix stacks.
+	MV->popMatrix();
+	P->popMatrix();
+
+	GLSL::checkError(GET_FILE_LINE);
+}
+
+int test()
+{
+
+	// Set error callback.
+	glfwSetErrorCallback(error_callback);
+	// Initialize the library.
+	if (!glfwInit()) {
+		return -1;
+	}
+	// Create a windowed mode window and its OpenGL context.
+	window = glfwCreateWindow(640, 480, "YOUR NAME", NULL, NULL);
+	if (!window) {
+		glfwTerminate();
+		return -1;
+	}
+	// Make the window's context current.
+	glfwMakeContextCurrent(window);
+	// Initialize GLEW.
+	glewExperimental = true;
+	if (glewInit() != GLEW_OK) {
+		cerr << "Failed to initialize GLEW" << endl;
+		return -1;
+	}
+	glGetError(); // A bug in glewInit() causes an error that we can safely ignore.
+	cout << "OpenGL version: " << glGetString(GL_VERSION) << endl;
+	cout << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
+	// Set vsync.
+	glfwSwapInterval(1);
+	// Set keyboard callback.
+	glfwSetKeyCallback(window, key_callback);
+	glfwSetCharCallback(window, character_callback);
+	// Initialize scene.
+	init();
+	// Loop until the user closes the window.
+	while (!glfwWindowShouldClose(window)) {
+		// Render scene.
+		render();
+		// Swap front and back buffers.
+		glfwSwapBuffers(window);
+		// Poll for and process events.
+		glfwPollEvents();
+	}
+	// Quit program.
+	glfwDestroyWindow(window);
+	glfwTerminate();
+	return 0;
+}
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
@@ -26,6 +275,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: Place code here.
+    test();
 
     // Initialize global strings
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
