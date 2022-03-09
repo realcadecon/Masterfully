@@ -29,7 +29,7 @@
 using namespace std;
 
 GLFWwindow* window; // Main application window
-string RES_DIR = "./resources"; // Where data files live
+string RES_DIR = "./resources/"; // Where data files live
 shared_ptr<Program> prog;
 shared_ptr<Shape> shape;
 shared_ptr<Shape> sphere;
