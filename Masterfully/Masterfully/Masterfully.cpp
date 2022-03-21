@@ -10,6 +10,7 @@
 #include <iostream>
 #include <vector>
 #include <stack>
+#include <fstream>
 
 
 #define GLEW_STATIC
@@ -377,14 +378,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	//If the function succeeds, open the sensor
 	if (SUCCEEDED(hr)) {
+		cout << "sensor detected\n";
 		hr = sensor->Open();
-
+		
 		if (SUCCEEDED(hr)) {
+			cout << "sensor opened\n";
 			//Get a body frame source from which we can get our body frame reader
 			IBodyFrameSource* bodyFrameSource = nullptr;
 			hr = sensor->get_BodyFrameSource(&bodyFrameSource);
 
 			if (SUCCEEDED(hr)) {
+				cout << "bodyFrameSource gotten\n";
 				hr = bodyFrameSource->OpenReader(&bodyFrameReader);
 			}
 
@@ -392,12 +396,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			safeRelease(bodyFrameSource);
 		}
 	}
+	else {
+		cout << "sensor not detected\n";
+	}
 
 	if (sensor == nullptr || FAILED(hr)) {
 		std::cerr << "Cannot find any sensors.\n";
 		return E_FAIL;
 	}
+
 	cout << "test" << endl;
+	cerr << "test" << endl;
+
     test();
 
     // Initialize global strings
