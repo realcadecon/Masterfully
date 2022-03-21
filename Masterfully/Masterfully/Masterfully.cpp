@@ -292,9 +292,18 @@ static void render()
 	// Draw mesh using GLSL.
 	prog->bind();
 	glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, &P->topMatrix()[0][0]);
-	double t = glfwGetTime();
+	/*double t = glfwGetTime();
 	double mod = 1 + (0.05 / 2) + (0.05 / 2) * sin(2 * PI * 2 * t);
-	root->draw(MV, prog, shape, sphere, dfsOrder[pos], mod, dfsOrder, spinners);
+	root->draw(MV, prog, shape, sphere, dfsOrder[pos], mod, dfsOrder, spinners);*/
+	MV->pushMatrix();
+	for (auto x : bodyJoints) {
+		for(int i = 0; i < JointType_Count; i++){
+			MV->translate(x[i].Position.X, x[i].Position.Y, x[i].Position.Z);
+			glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
+			sphere->draw(prog);
+		}
+	}
+	MV->popMatrix();
 	prog->unbind();
 
 	// Pop matrix stacks.
