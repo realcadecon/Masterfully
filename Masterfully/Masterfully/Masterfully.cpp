@@ -373,22 +373,27 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: Place code here.
+	
 	//Get the default Kinect sensor
 	hr = GetDefaultKinectSensor(&sensor);
 
+	BOOLEAN isSensorAvailable = false;
+	hr = sensor->get_IsAvailable(&isSensorAvailable);
+	if (SUCCEEDED(hr) && isSensorAvailable == false) {
+		std::cerr << "No available sensor is found.\n";
+	}
+
+	cerr << sensor << "\n";
 	//If the function succeeds, open the sensor
 	if (SUCCEEDED(hr)) {
-		cout << "sensor detected\n";
 		hr = sensor->Open();
 		
 		if (SUCCEEDED(hr)) {
-			cout << "sensor opened\n";
 			//Get a body frame source from which we can get our body frame reader
 			IBodyFrameSource* bodyFrameSource = nullptr;
 			hr = sensor->get_BodyFrameSource(&bodyFrameSource);
 
 			if (SUCCEEDED(hr)) {
-				cout << "bodyFrameSource gotten\n";
 				hr = bodyFrameSource->OpenReader(&bodyFrameReader);
 			}
 
