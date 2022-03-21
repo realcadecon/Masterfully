@@ -298,6 +298,8 @@ static void render()
 	MV->pushMatrix();
 	for (auto x : bodyJoints) {
 		for(int i = 0; i < JointType_Count; i++){
+			if (x[i].TrackingState == 0)
+				continue;
 			MV->translate(x[i].Position.X, x[i].Position.Y, x[i].Position.Z);
 			glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
 			sphere->draw(prog);
