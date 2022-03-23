@@ -32,6 +32,7 @@
 using namespace std;
 
 GLFWwindow* window; // Main application window
+GLFWwindow* kinectVideoOut; //RGB kinect video output
 string RES_DIR = "./resources/"; // Where data files live
 shared_ptr<Program> prog;
 shared_ptr<Shape> shape;
@@ -42,9 +43,12 @@ static int pos = 0;
 static vector<int> spinners = { 2, 5 };
 
 const int FRAMERATE = 30;
+GLuint textureId;			 // ID of the texture to contain Kinect RGB Data
+GLubyte textureData[640 * 480 * 4]; // BGRA array containing the texture data
 
 IKinectSensor* sensor = nullptr;
 IBodyFrameReader* bodyFrameReader = nullptr;
+IColorFrameReader* colorFramerReader = nullptr;
 HRESULT hr;
 #define MAX_LOADSTRING 100
 
@@ -199,6 +203,75 @@ static void init()
 	GLSL::checkError(GET_FILE_LINE);
 }
 
+static bool initKinect() {
+	if (FAILED(GetDefaultKinectSensor(&sensor))) {
+		return false;
+	}
+	if (sensor) {
+		sensor->Open();
+
+		IColorFrameSource* framesource = NULL;
+		sensor->get_ColorFrameSource(&framesource);
+		framesource->OpenReader(&colorFramerReader);
+		if (framesource) {
+			framesource->Release();
+			framesource = NULL;
+		}
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+static void renderVideo() {
+	IColorFrame* frame = NULL;
+	if (SUCCEEDED(colorFramerReader->AcquireLatestFrame(&frame))) {
+		frame->CopyConvertedFrameDataToArray(640 * 480 * 4, textureData, ColorImageFormat_Bgra);
+	}
+	if (frame) frame->Release();
+
+	// Initialize textures
+	glGenTextures(1, &textureId);
+	glBindTexture(GL_TEXTURE_2D, textureId);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 640, 480,
+		0, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)textureData);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	// OpenGL setup
+	glClearColor(0, 0, 0, 0);
+	glClearDepth(1.0f);
+	glEnable(GL_TEXTURE_2D);
+
+	// Camera setup
+	glViewport(0, 0, 640, 480);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0, 640, 480, 0, 1, -1);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	//draw frames
+	glBindTexture(GL_TEXTURE_2D, textureId);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 640, 480, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)textureData);
+
+	// Clear framebuffer.
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(0, 0, 0);
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex3f(640, 0, 0);
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(640, 480, 0.0f);
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex3f(0, 480, 0.0f);
+	glEnd();
+
+}
+
 static void render()
 {
 	IBodyFrame* bodyFrame = nullptr;
@@ -332,8 +405,13 @@ int test()
 		return -1;
 	}
 	// Create a windowed mode window and its OpenGL context.
-	window = glfwCreateWindow(640, 480, "YOUR NAME", NULL, NULL);
+	window = glfwCreateWindow(640, 480, "Animation", NULL, NULL);
 	if (!window) {
+		glfwTerminate();
+		return -1;
+	}
+	kinectVideoOut = glfwCreateWindow(640, 480, "Kinect Video", NULL, NULL);
+	if (!kinectVideoOut) {
 		glfwTerminate();
 		return -1;
 	}
@@ -355,14 +433,20 @@ int test()
 	glfwSetCharCallback(window, character_callback);
 	// Initialize scene.
 	init();
+	initKinect();
 	// Loop until the user closes the window.
 	double lastTime = glfwGetTime();
 	while (!glfwWindowShouldClose(window)) {
-		// Render scene.
+		//animation
+		glfwMakeContextCurrent(window);
 		render();
-		// Swap front and back buffers.
 		glfwSwapBuffers(window);
-		// Poll for and process events.
+
+		//kinect video
+		glfwMakeContextCurrent(kinectVideoOut);
+		renderVideo();
+		glfwSwapBuffers(kinectVideoOut);
+		
 		glfwPollEvents();
 		while (glfwGetTime() < lastTime + 1.0/ FRAMERATE) { //frame limiter
 			
@@ -371,6 +455,7 @@ int test()
 	}
 	// Quit program.
 	glfwDestroyWindow(window);
+	glfwDestroyWindow(kinectVideoOut);
 	glfwTerminate();
 	return 0;
 }
