@@ -11,6 +11,7 @@
 #include <vector>
 #include <stack>
 #include <fstream>
+#include <time.h>
 
 
 #define GLEW_STATIC
@@ -39,6 +40,8 @@ shared_ptr<Component> root;
 static vector<shared_ptr<Component>> dfsOrder;
 static int pos = 0;
 static vector<int> spinners = { 2, 5 };
+
+const int FRAMERATE = 30;
 
 IKinectSensor* sensor = nullptr;
 IBodyFrameReader* bodyFrameReader = nullptr;
@@ -302,8 +305,8 @@ static void render()
 			if (x[i].TrackingState == 0)
 				continue;
 			MV->pushMatrix();
-			MV->scale(0.1f);
 			MV->translate(x[i].Position.X, x[i].Position.Y, x[i].Position.Z);
+			MV->scale(.7,.7,.7);
 			glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
 			sphere->draw(prog);
 			MV->popMatrix();
@@ -353,6 +356,7 @@ int test()
 	// Initialize scene.
 	init();
 	// Loop until the user closes the window.
+	double lastTime = glfwGetTime();
 	while (!glfwWindowShouldClose(window)) {
 		// Render scene.
 		render();
@@ -360,6 +364,10 @@ int test()
 		glfwSwapBuffers(window);
 		// Poll for and process events.
 		glfwPollEvents();
+		while (glfwGetTime() < lastTime + 1.0/ FRAMERATE) { //frame limiter
+			
+		}
+		lastTime += 1.0 / FRAMERATE;
 	}
 	// Quit program.
 	glfwDestroyWindow(window);
