@@ -36,10 +36,6 @@ string RES_DIR = "./resources/"; // Where data files live
 shared_ptr<Program> prog;
 shared_ptr<Shape> shape;
 shared_ptr<Shape> sphere;
-shared_ptr<Component> root;
-static vector<shared_ptr<Component>> dfsOrder;
-static int pos = 0;
-static vector<int> spinners = { 2, 5 };
 
 const int FRAMERATE = 30;
 
@@ -82,14 +78,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
 void character_callback(GLFWwindow* window, unsigned int codepoint)
 {
-	if (codepoint == 46) { ++pos; pos = pos % dfsOrder.size(); } // .
-	if (codepoint == 44) { --pos; if (pos == -1) pos = dfsOrder.size() - 1; pos = pos % dfsOrder.size(); } // ,
-	if (codepoint == 120) { dfsOrder[pos]->ang += glm::vec3(0.1, 0, 0); } // x
-	if (codepoint == 88) { dfsOrder[pos]->ang += glm::vec3(-0.1, 0, 0); } // X
-	if (codepoint == 121) { dfsOrder[pos]->ang += glm::vec3(0, 0.1, 0); } // y
-	if (codepoint == 89) { dfsOrder[pos]->ang += glm::vec3(0, -0.1, 0); } // Y
-	if (codepoint == 122) { dfsOrder[pos]->ang += glm::vec3(0, 0, 0.1); } // z
-	if (codepoint == 90) { dfsOrder[pos]->ang += glm::vec3(0, 0, -0.1); } // Z
+	if (codepoint == 46) {;}
 }
 
 static void init()
@@ -121,77 +110,6 @@ static void init()
 	prog->addAttribute("aPos");
 	prog->addAttribute("aNor");
 	prog->setVerbose(false);
-
-	// initialize root component
-	root = make_shared<Component>("root");
-	root->scale = glm::vec3(2, 3, 1);
-
-	auto head = make_shared<Component>("head");
-	head->tp = glm::vec3(0, 1.5, 0);
-	head->tm = glm::vec3(0, 0.6, 0);
-	head->scale = glm::vec3(1.2, 1.2, 1.2);
-	root->addComponent(head);
-
-	auto larm = make_shared<Component>("left arm");
-	larm->tp = glm::vec3(-1, 1.15, 0);
-	larm->tm = glm::vec3(0, -1, 0);
-	larm->scale = glm::vec3(0.5, 2, 0.5);
-	larm->ang = glm::vec3(0, 0, -0.5 * PI);
-	auto llarm = make_shared<Component>("lower left arm");
-	llarm->tp = glm::vec3(0, -2, 0);
-	llarm->tm = glm::vec3(0, -0.75, 0);
-	llarm->scale = glm::vec3(0.4, 1.5, 0.4);
-	larm->addComponent(llarm);
-	root->addComponent(larm);
-
-	auto rarm = make_shared<Component>("right arm");
-	rarm->tp = glm::vec3(1, 1.15, 0);
-	rarm->tm = glm::vec3(0, -1, 0);
-	rarm->scale = glm::vec3(0.5, 2, 0.5);
-	rarm->ang = glm::vec3(0, 0, 0.5 * PI);
-	auto lrarm = make_shared<Component>("lower right arm");
-	lrarm->tp = glm::vec3(0, -2, 0);
-	lrarm->tm = glm::vec3(0, -0.75, 0);
-	lrarm->scale = glm::vec3(0.4, 1.5, 0.4);
-	rarm->addComponent(lrarm);
-	root->addComponent(rarm);
-
-	auto lleg = make_shared<Component>("left leg");
-	lleg->tp = glm::vec3(-0.5, -1.5, 0);
-	lleg->tm = glm::vec3(0, -1.125, 0);
-	lleg->scale = glm::vec3(0.9, 2.25, 0.9);
-	auto llleg = make_shared<Component>("lower left leg");
-	llleg->tp = glm::vec3(0, -2.25, 0);
-	llleg->tm = glm::vec3(0, -1, 0);
-	llleg->scale = glm::vec3(0.8, 2, 0.8);
-	lleg->addComponent(llleg);
-	root->addComponent(lleg);
-
-	auto rleg = make_shared<Component>("right leg");
-	rleg->tp = glm::vec3(0.5, -1.5, 0);
-	rleg->tm = glm::vec3(0, -1.125, 0);
-	rleg->scale = glm::vec3(0.9, 2.25, 0.9);
-	auto lrleg = make_shared<Component>("lower right leg");
-	lrleg->tp = glm::vec3(0, -2.25, 0);
-	lrleg->tm = glm::vec3(0, -1, 0);
-	lrleg->scale = glm::vec3(0.8, 2, 0.8);
-	rleg->addComponent(lrleg);
-	root->addComponent(rleg);
-
-
-	if (root->children.size() > 0) {
-		stack<shared_ptr<Component>> frontier;
-		frontier.push(root);
-		while (!frontier.empty()) {
-			shared_ptr<Component> cur = frontier.top();
-			frontier.pop();
-			dfsOrder.push_back(cur);
-			int sz = cur->children.size();
-			for (int i = sz - 1; i >= 0; --i) {
-				frontier.push(cur->children[i]);
-			}
-		}
-	}
 
 	// If there were any OpenGL errors, this will print something.
 	// You can intersperse this line in your code to find the exact location
@@ -291,14 +209,11 @@ static void render()
 	P->multMatrix(glm::perspective((float)(45.0 * M_PI / 180.0), aspect, 0.01f, 100.0f));
 	// Apply camera transform.
 	MV->pushMatrix();
-	MV->translate(glm::vec3(0, 1, -12));
+	MV->translate(glm::vec3(0, 0, 0));
 
 	// Draw mesh using GLSL.
 	prog->bind();
 	glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, &P->topMatrix()[0][0]);
-	/*double t = glfwGetTime();
-	double mod = 1 + (0.05 / 2) + (0.05 / 2) * sin(2 * PI * 2 * t);
-	root->draw(MV, prog, shape, sphere, dfsOrder[pos], mod, dfsOrder, spinners);*/
 	MV->pushMatrix();
 	for (auto x : bodyJoints) {
 		for(int i = 0; i < JointType_Count; i++){
