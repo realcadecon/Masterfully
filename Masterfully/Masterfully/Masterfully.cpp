@@ -42,6 +42,10 @@ const int FRAMERATE = 30;
 GLuint textureId;			 // ID of the texture to contain Kinect RGB Data
 GLubyte textureData[640 * 480 * 4]; // BGRA array containing the texture data
 
+const int FRAMERATE = 30;
+GLuint textureId;			 // ID of the texture to contain Kinect RGB Data
+GLubyte textureData[640 * 480 * 4]; // BGRA array containing the texture data
+
 IKinectSensor* sensor = nullptr;
 IBodyFrameReader* bodyFrameReader = nullptr;
 IColorFrameReader* colorFramerReader = nullptr;
