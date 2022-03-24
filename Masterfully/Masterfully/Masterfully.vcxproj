@@ -157,6 +157,8 @@
     <ClInclude Include="Component.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GLSL.h" />
+    <ClInclude Include="JointNode.h" />
+    <ClInclude Include="Line.h" />
     <ClInclude Include="Masterfully.h" />
     <ClInclude Include="MatrixStack.h" />
     <ClInclude Include="Program.h" />

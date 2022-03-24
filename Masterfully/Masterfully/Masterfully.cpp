@@ -12,6 +12,7 @@
 #include <stack>
 #include <fstream>
 #include <time.h>
+#include <unordered_map>
 
 
 #define GLEW_STATIC
@@ -27,6 +28,8 @@
 #include "Program.h"
 #include "Shape.h"
 #include "Component.h"
+#include "JointNode.h"
+#include "Line.h"
 #include <inc/Kinect.h>
 
 using namespace std;
@@ -37,6 +40,10 @@ string RES_DIR = "./resources/"; // Where data files live
 shared_ptr<Program> prog;
 shared_ptr<Shape> shape;
 shared_ptr<Shape> sphere;
+JointNode* studentRoot;
+JointNode* teacherRoot;
+unordered_map<JointType, JointNode*> studentJointMap;
+unordered_map<JointType, JointNode*> teacherJointMap;
 
 const int FRAMERATE = 30;
 GLuint textureId;			 // ID of the texture to contain Kinect RGB Data
@@ -85,6 +92,126 @@ void character_callback(GLFWwindow* window, unsigned int codepoint)
 	if (codepoint == 46) {;}
 }
 
+static void initHierarchy(JointNode *root, unordered_map<JointType, JointNode*> &jointMap) {
+	// Spine Nodes
+	root = new JointNode(JointType_SpineBase);
+	jointMap[JointType_SpineBase] = root;
+
+	JointNode* spineMid = new JointNode(JointType_SpineMid);
+	jointMap[JointType_SpineMid] = spineMid;
+
+	JointNode* spineShoulder = new JointNode(JointType_SpineShoulder);
+	jointMap[JointType_SpineShoulder] = spineShoulder;
+
+	JointNode* neck = new JointNode(JointType_Neck);
+	jointMap[JointType_Neck] = neck;
+
+	JointNode* head = new JointNode(JointType_Head);
+	jointMap[JointType_Head] = head;
+
+	// Right Side
+	JointNode* shoulderRight = new JointNode(JointType_ShoulderRight);
+	jointMap[JointType_ShoulderRight] = shoulderRight;
+
+	JointNode* elbowRight = new JointNode(JointType_ElbowRight);
+	jointMap[JointType_ElbowRight] = elbowRight;
+
+	JointNode* wristRight = new JointNode(JointType_WristRight);
+	jointMap[JointType_WristRight] = wristRight;
+
+	JointNode* handRight = new JointNode(JointType_HandRight);
+	jointMap[JointType_HandRight] = handRight;
+
+	JointNode* handTipRight = new JointNode(JointType_HandTipRight);
+	jointMap[JointType_HandTipRight] = handTipRight;
+
+	JointNode* thumbRight = new JointNode(JointType_ThumbRight);
+	jointMap[JointType_ThumbRight] = thumbRight;
+
+	JointNode* hipRight = new JointNode(JointType_HipRight);
+	jointMap[JointType_HipRight] = hipRight;
+
+	JointNode* kneeRight = new JointNode(JointType_KneeRight);
+	jointMap[JointType_KneeRight] = kneeRight;
+
+	JointNode* ankleRight = new JointNode(JointType_AnkleRight);
+	jointMap[JointType_AnkleRight] = ankleRight;
+
+	JointNode* footRight = new JointNode(JointType_FootRight);
+	jointMap[JointType_FootRight] = footRight;
+
+	// Left Side
+	JointNode* shoulderLeft = new JointNode(JointType_ShoulderLeft);
+	jointMap[JointType_ShoulderLeft] = shoulderLeft;
+
+	JointNode* elbowLeft = new JointNode(JointType_ElbowLeft);
+	jointMap[JointType_ElbowLeft] = elbowLeft;
+
+	JointNode* wristLeft = new JointNode(JointType_WristLeft);
+	jointMap[JointType_WristLeft] = wristLeft;
+
+	JointNode* handLeft = new JointNode(JointType_HandLeft);
+	jointMap[JointType_HandLeft] = handLeft;
+
+	JointNode* handTipLeft = new JointNode(JointType_HandTipLeft);
+	jointMap[JointType_HandTipLeft] = handTipLeft;
+
+	JointNode* thumbLeft = new JointNode(JointType_ThumbLeft);
+	jointMap[JointType_ThumbLeft] = thumbLeft;
+
+	JointNode* hipLeft = new JointNode(JointType_HipLeft);
+	jointMap[JointType_HipLeft] = hipLeft;
+
+	JointNode* kneeLeft = new JointNode(JointType_KneeLeft);
+	jointMap[JointType_KneeLeft] = kneeLeft;
+
+	JointNode* ankleLeft = new JointNode(JointType_AnkleLeft);
+	jointMap[JointType_AnkleLeft] = ankleLeft;
+
+	JointNode* footLeft = new JointNode(JointType_FootLeft);
+	jointMap[JointType_FootLeft] = footLeft;
+
+	// Make Hierarchy
+	// --- Spine Connections
+	root->limbs.push_back(new JointNode::Limb( glm::vec3(0.f, 0.f, 0.f), 0.f, spineMid ));
+	root->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, hipRight ));
+	root->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, hipLeft ));
+
+	spineMid->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, spineShoulder ));
+
+	spineShoulder->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, neck ));
+	spineShoulder->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, shoulderRight ));
+	spineShoulder->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, shoulderLeft ));
+
+	neck->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, head ));
+
+	// --- Right Side Connections
+	// --- --- Right Arm
+	shoulderRight->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, elbowRight ));
+	elbowRight->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, wristRight ));
+	wristRight->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, handRight ));
+	handRight->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, handTipRight ));
+	handRight->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, thumbRight ));
+
+	// --- --- Right Leg
+	hipRight->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, kneeRight ));
+	kneeRight->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, ankleRight ));
+	ankleRight->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, footRight ));
+
+	// Left Side Connections
+	// --- --- Left Arm
+	shoulderLeft->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, elbowLeft ));
+	elbowLeft->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, wristLeft ));
+	wristLeft->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, handLeft ));
+	handLeft->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, handTipLeft ));
+	handLeft->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, thumbLeft ));
+
+	// --- --- Left Leg
+	hipLeft->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, kneeLeft ));
+	kneeLeft->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, ankleLeft ));
+	ankleLeft->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, footLeft ));
+}
+
 static void init()
 {
 	GLSL::checkVersion();
@@ -115,10 +242,36 @@ static void init()
 	prog->addAttribute("aNor");
 	prog->setVerbose(false);
 
+	initHierarchy(studentRoot, studentJointMap);
+	initHierarchy(teacherRoot, teacherJointMap);
+
 	// If there were any OpenGL errors, this will print something.
 	// You can intersperse this line in your code to find the exact location
 	// of your OpenGL error.
 	GLSL::checkError(GET_FILE_LINE);
+}
+
+glm::vec3 CSPtovec3(CameraSpacePoint &p) {
+	return glm::vec3(p.X, p.Y, p.Z);
+}
+
+void loadJointsIntoHierarchy(Joint* joint, JointNode* root, unordered_map<JointType, JointNode*> jointMap) {
+	for (int i = 0; i < JointType_Count; ++i) {
+		jointMap[JointType(i)]->pos = CSPtovec3(joint[i].Position);
+	}
+	
+	stack<JointNode*> s;
+
+	s.push(root);
+	while (!s.empty()) {
+		JointNode* cur = s.top();
+		s.pop();
+		for (auto* x : cur->limbs) {
+			x->length = glm::distance(x->node->pos, cur->pos);
+			x->norm = glm::normalize(x->node->pos - cur->pos);
+			s.push(x->node);
+		}
+	}
 }
 
 static bool initKinect() {
@@ -190,11 +343,9 @@ static void renderVideo() {
 
 }
 
-static void render()
-{
+static void getJointData(vector<Joint*> &bodyJoints) {
 	IBodyFrame* bodyFrame = nullptr;
 	hr = bodyFrameReader->AcquireLatestFrame(&bodyFrame);
-	vector<Joint*> bodyJoints;
 
 	if (SUCCEEDED(hr)) {
 		IBody* bodies[BODY_COUNT] = { 0 };
@@ -265,6 +416,37 @@ static void render()
 	else {
 		std::cerr << "Trouble reading the body frame.\n";
 	}
+}
+
+glm::vec3 getColor(glm::vec3 sNorm, glm::vec3 tNorm) {
+	// temporary logic
+	glm::vec3 col(0, 255, 0);
+	float ang = glm::acos(glm::dot(sNorm, tNorm));
+	int val = max(ang/6.28, 1.0) * 510.0;
+	if (val > 255) {
+		col.r += 255;
+		col.g -= (val - 255);
+	}
+	else {
+		col.r += val;
+	}
+	return col;
+}
+
+static void render()
+{
+	// Get Joint data from Kinect
+	vector<Joint*> bodyJoints;
+	getJointData(bodyJoints);
+
+	// Load Joint data into hierarchy
+	if (bodyJoints.size() > 0) {
+		loadJointsIntoHierarchy(bodyJoints[0], studentRoot, studentJointMap);
+	}
+	else {
+		cerr << "No Body Detected\n";
+	}
+
 	// Get current frame buffer size.
 	int width, height;
 	glfwGetFramebufferSize(window, &width, &height);
@@ -288,16 +470,26 @@ static void render()
 	prog->bind();
 	glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, &P->topMatrix()[0][0]);
 	MV->pushMatrix();
-	for (auto x : bodyJoints) {
-		for(int i = 0; i < JointType_Count; i++){
-			if (x[i].TrackingState == 0)
-				continue;
+	stack<JointNode*> s;
+	if (bodyJoints.size() > 0) {
+		s.push(studentRoot);
+		while (!s.empty()) {
+			JointNode* cur = s.top();
+			s.pop();
 			MV->pushMatrix();
-			MV->translate(x[i].Position.X, x[i].Position.Y, x[i].Position.Z);
-			MV->scale(.7,.7,.7);
+			MV->scale(.7, .7, .7);
+			MV->translate(cur->pos);
 			glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
 			sphere->draw(prog);
 			MV->popMatrix();
+			prog->unbind();
+			for (auto* x : cur->limbs) {
+				s.push(x->node);
+				Line l(cur->pos, x->node->pos);
+				l.setColor(getColor(x->norm, glm::vec3(0, 1, 0)));
+				l.setMVP(P->topMatrix());
+			}
+			prog->bind();
 		}
 	}
 	MV->popMatrix();
@@ -372,6 +564,9 @@ int test()
 	glfwDestroyWindow(window);
 	glfwDestroyWindow(kinectVideoOut);
 	glfwTerminate();
+
+	// Garbage Cleanup of Hierarchy
+
 	return 0;
 }
 
