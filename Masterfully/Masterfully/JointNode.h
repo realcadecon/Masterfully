@@ -23,5 +23,5 @@ public:
 	glm::vec3 pos;
 	std::vector<Limb*> limbs;
 
-	JointNode(JointType type): type(type), pos(glm::vec3(0, 0, 0)) {}
+	JointNode(JointType _type): type(_type), pos(glm::vec3(0, 0, 0)) {}
 };
