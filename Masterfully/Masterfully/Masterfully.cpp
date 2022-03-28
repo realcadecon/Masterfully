@@ -371,9 +371,14 @@ static void getJointData(vector<Joint*> &bodyJoints) {
 				hr = body->GetJoints(_countof(joints), joints);
 				if (SUCCEEDED(hr)) {
 					bodyJoints.push_back(joints);
+					const CameraSpacePoint& leftHip = joints[JointType_HipLeft].Position;
+					const CameraSpacePoint& leftKnee = joints[JointType_KneeLeft].Position;
+					//std::cout << "Left Hip = (" << leftHip.X << ", " << leftHip.Y << ") | Left Knee = (" << leftKnee.X << ", " << leftKnee.Y << ")" << endl;
 					//Let's print the head's position
 					const CameraSpacePoint& headPos = joints[JointType_Head].Position;
 					const CameraSpacePoint& leftHandPos = joints[JointType_HandLeft].Position;
+
+
 
 					//Let's check if the use has his hand up
 					if (leftHandPos.Y >= headPos.Y) {
@@ -466,7 +471,7 @@ static void render()
 	P->multMatrix(glm::perspective((float)(45.0 * M_PI / 180.0), aspect, 0.01f, 100.0f));
 	// Apply camera transform.
 	MV->pushMatrix();
-	MV->translate(glm::vec3(0, 0, -6));
+	MV->translate(glm::vec3(0, 0, -8));
 
 	// Draw mesh using GLSL.
 	prog->bind();
@@ -480,7 +485,7 @@ static void render()
 			s.pop();
 			MV->pushMatrix();
 				MV->translate(cur->pos);
-				MV->scale(.3, .3, .3);
+				MV->scale(.2, .2, .2);
 				glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
 				glUniform3f(prog->getUniform("col"), cur->color.r, cur->color.g, cur->color.b);
 				sphere->draw(prog);
@@ -488,10 +493,10 @@ static void render()
 			prog->unbind();
 			for (auto* x : cur->limbs) {
 				s.push(x->node);
-				Line l(cur->pos, x->node->pos);
+				/*Line l(cur->pos, x->node->pos);
 				l.setColor(getColor(x->norm, glm::vec3(0, 1, 0)));
 				l.setMVP(MV->topMatrix() * P->topMatrix());
-				l.draw();
+				l.draw();*/
 			}
 			prog->bind();
 		}
