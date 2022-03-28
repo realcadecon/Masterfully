@@ -1,7 +1,7 @@
 #version 120
 
 varying vec3 vNor;
-varying vec3 col;
+uniform vec3 col;
 
 void main()
 {

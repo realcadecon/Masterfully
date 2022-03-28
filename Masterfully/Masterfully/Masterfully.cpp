@@ -482,6 +482,7 @@ static void render()
 				MV->translate(cur->pos);
 				MV->scale(.3, .3, .3);
 				glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
+				glUniform3f(prog->getUniform("col"), cur->color.r, cur->color.g, cur->color.b);
 				sphere->draw(prog);
 			MV->popMatrix();
 			prog->unbind();
