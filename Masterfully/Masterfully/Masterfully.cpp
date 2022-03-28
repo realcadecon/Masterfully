@@ -294,7 +294,7 @@ void loadJointsIntoHierarchy(Joint* joint, JointNode* root, unordered_map<JointT
 		for (auto* x : cur->limbs) {
 			x->length = glm::distance(x->node->pos, cur->pos);
 			x->norm = glm::normalize(x->node->pos - cur->pos);
-			cout << cur->type << "->" << x->node->type << " x: " << x->norm.x << " y: " << x->norm.y << " z: " << x->norm.z << "\n";
+			cout <<x->norm.x << " " << x->norm.y << " " << x->norm.z << "\n";
 			s.push(x->node);
 		}
 	}
@@ -451,7 +451,7 @@ glm::vec3 getColor(glm::vec3 sNorm, glm::vec3 tNorm) {
 	// temporary logic
 	glm::vec3 col(0, 255, 0);
 	float ang = glm::acos(glm::dot(sNorm, tNorm));
-	int val = max(ang/6.28, 1.0) * 510.0;
+	int val = min(ang/(M_PI/2), 1.0) * 510.0;
 	if (val > 255) {
 		col.r += 255;
 		col.g -= (val - 255);
@@ -488,7 +488,7 @@ static void render()
 	Joint bodyJoints[25];
 	getJointData(bodyJoints);
 	// Load Joint data into hierarchy
-	if (bodyJoints[0].Position.X != 0) {
+	if (bodyJoints[0].Position.X > -1000) {
 		loadJointsIntoHierarchy(bodyJoints, studentRoot, studentJointMap);
 		computeTeacherData();
 	}
@@ -538,6 +538,7 @@ static void render()
 			MV->popMatrix();
 			MV->pushMatrix();
 				MV->translate(cur_t->pos);
+				MV->translate(0, 0, -.5);
 				MV->scale(.2, .2, .2);
 				glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
 				glUniform3f(prog->getUniform("col"), 200.f, 200.f, 200.f);
@@ -548,8 +549,9 @@ static void render()
 				auto* x = cur->limbs[i];
 				auto* x_t = cur_t->limbs[i];
 				s.push(x->node);
-				s_t.push(x->node);
+				s_t.push(x_t->node);
 				x->node->color = getColor(x->norm, x_t->norm);
+
 				Line l(cur->pos, x->node->pos);
 				l.setColor(getColor(x->norm, x_t->norm));
 				glm::mat4 view = lookAt(glm::vec3(0, 0, 7), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
