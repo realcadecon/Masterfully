@@ -346,7 +346,7 @@ static void renderVideo() {
 
 }
 
-static void getJointData(vector<Joint*> &bodyJoints) {
+static void getJointData(Joint* bodyJoints) {
 	IBodyFrame* bodyFrame = nullptr;
 	hr = bodyFrameReader->AcquireLatestFrame(&bodyFrame);
 
@@ -370,20 +370,16 @@ static void getJointData(vector<Joint*> &bodyJoints) {
 				Joint joints[JointType_Count];
 				hr = body->GetJoints(_countof(joints), joints);
 				if (SUCCEEDED(hr)) {
-					bodyJoints.push_back(joints);
+					for (int i = 0; i < 25; i++) {
+						bodyJoints[i] = joints[i];
+					}
 					const CameraSpacePoint& leftHip = joints[JointType_HipLeft].Position;
 					const CameraSpacePoint& leftKnee = joints[JointType_KneeLeft].Position;
-					//std::cout << "Left Hip = (" << leftHip.X << ", " << leftHip.Y << ") | Left Knee = (" << leftKnee.X << ", " << leftKnee.Y << ")" << endl;
 					//Let's print the head's position
 					const CameraSpacePoint& headPos = joints[JointType_Head].Position;
 					const CameraSpacePoint& leftHandPos = joints[JointType_HandLeft].Position;
 
 
-
-					//Let's check if the use has his hand up
-					if (leftHandPos.Y >= headPos.Y) {
-						std::cout << "LEFT HAND UP!!\n";
-					}
 
 					HandState leftHandState;
 					hr = body->get_HandLeftState(&leftHandState);
@@ -444,18 +440,18 @@ glm::vec3 getColor(glm::vec3 sNorm, glm::vec3 tNorm) {
 static void render()
 {
 	// Get Joint data from Kinect
-	vector<Joint*> bodyJoints;
+	Joint bodyJoints[25];
 	getJointData(bodyJoints);
 	// Load Joint data into hierarchy
-	if (bodyJoints.size() > 0) {
-		loadJointsIntoHierarchy(bodyJoints[0], studentRoot, studentJointMap);
+	if (bodyJoints[0].Position.X != 0) {
+		loadJointsIntoHierarchy(bodyJoints, studentRoot, studentJointMap);
 	}
 	else {
 		cerr << "No Body Detected\n";
 	}
 
 	// Get current frame buffer size.
-	int width, height;
+	int width = 0, height = 0;
 	glfwGetFramebufferSize(window, &width, &height);
 	float aspect = width / (float)height;
 	glViewport(0, 0, width, height);
@@ -471,15 +467,15 @@ static void render()
 	P->multMatrix(glm::perspective((float)(45.0 * M_PI / 180.0), aspect, 0.01f, 100.0f));
 	// Apply camera transform.
 	MV->pushMatrix();
-	MV->translate(glm::vec3(0, 0, -8));
+	MV->translate(glm::vec3(0, 0, -7));
 
 	// Draw mesh using GLSL.
 	prog->bind();
 	glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, &P->topMatrix()[0][0]);
 	MV->pushMatrix();
 	stack<JointNode*> s;
-	if (bodyJoints.size() > 0) {
-		/*s.push(studentRoot);
+	if (bodyJoints != nullptr) {
+		s.push(studentRoot);
 		while (!s.empty()) {
 			JointNode* cur = s.top();
 			s.pop();
@@ -493,22 +489,13 @@ static void render()
 			prog->unbind();
 			for (auto* x : cur->limbs) {
 				s.push(x->node);
-				/*Line l(cur->pos, x->node->pos);
+				Line l(cur->pos, x->node->pos);
 				l.setColor(getColor(x->norm, glm::vec3(0, 1, 0)));
-				l.setMVP(MV->topMatrix() * P->topMatrix());
-				l.draw();*/
+				glm::mat4 view = lookAt(glm::vec3(0, 0, 7), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+				l.setMVP(P->topMatrix() * view);
+				l.draw();
 			}
 			prog->bind();
-		}*/
-		Joint* x = bodyJoints[0];
-		for (int i = 0; i < JointType_Count; ++i) {
-			MV->pushMatrix();
-				MV->translate(x[i].Position.X, x[i].Position.Y, x[i].Position.Z);
-				MV->scale(.3, .3, .3);
-				glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
-				glUniform3f(prog->getUniform("col"), studentJointMap[JointType(i)]->color.r, studentJointMap[JointType(i)]->color.g, studentJointMap[JointType(i)]->color.b);
-				sphere->draw(prog);
-			MV->popMatrix();
 		}
 	}
 	MV->popMatrix();
