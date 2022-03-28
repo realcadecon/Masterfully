@@ -474,7 +474,7 @@ static void render()
 	MV->pushMatrix();
 	stack<JointNode*> s;
 	if (bodyJoints.size() > 0) {
-		s.push(studentRoot);
+		/*s.push(studentRoot);
 		while (!s.empty()) {
 			JointNode* cur = s.top();
 			s.pop();
@@ -494,6 +494,16 @@ static void render()
 				l.draw();
 			}
 			prog->bind();
+		}*/
+		Joint* x = bodyJoints[0];
+		for (int i = 0; i < JointType_Count; ++i) {
+			MV->pushMatrix();
+				MV->translate(x[i].Position.X, x[i].Position.Y, x[i].Position.Z);
+				MV->scale(.3, .3, .3);
+				glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
+				glUniform3f(prog->getUniform("col"), studentJointMap[JointType(i)]->color.r, studentJointMap[JointType(i)]->color.g, studentJointMap[JointType(i)]->color.b);
+				sphere->draw(prog);
+			MV->popMatrix();
 		}
 	}
 	MV->popMatrix();
