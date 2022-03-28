@@ -255,7 +255,7 @@ glm::vec3 CSPtovec3(CameraSpacePoint &p) {
 	return glm::vec3(p.X, p.Y, p.Z);
 }
 
-void loadJointsIntoHierarchy(Joint* joint, JointNode* root, unordered_map<JointType, JointNode*> jointMap) {
+void loadJointsIntoHierarchy(Joint* joint, JointNode* root, unordered_map<JointType, JointNode*> &jointMap) {
 	for (int i = 0; i < JointType_Count; ++i) {
 		jointMap[JointType(i)]->pos = CSPtovec3(joint[i].Position);
 	}
@@ -579,7 +579,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: Place code here.
-	
+
 	//Get the default Kinect sensor
 	hr = GetDefaultKinectSensor(&sensor);
 
