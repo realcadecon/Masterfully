@@ -97,78 +97,78 @@ static void initHierarchy(JointNode *root, unordered_map<JointType, JointNode*> 
 	//root = new JointNode(JointType_SpineBase);
 	jointMap[JointType_SpineBase] = root;
 
-	JointNode* spineMid = new JointNode(JointType_SpineMid);
+	JointNode* spineMid = new JointNode(JointType_SpineMid, glm::vec3(1,0,0)); //red
 	jointMap[JointType_SpineMid] = spineMid;
 
-	JointNode* spineShoulder = new JointNode(JointType_SpineShoulder);
+	JointNode* spineShoulder = new JointNode(JointType_SpineShoulder, glm::vec3(51, 0, 0)); //dark red
 	jointMap[JointType_SpineShoulder] = spineShoulder;
 
-	JointNode* neck = new JointNode(JointType_Neck);
+	JointNode* neck = new JointNode(JointType_Neck, glm::vec3(255, 102, 102)); //light red
 	jointMap[JointType_Neck] = neck;
 
-	JointNode* head = new JointNode(JointType_Head);
+	JointNode* head = new JointNode(JointType_Head, glm::vec3(255, 204, 204)); //very light red
 	jointMap[JointType_Head] = head;
 
 	// Right Side
-	JointNode* shoulderRight = new JointNode(JointType_ShoulderRight);
+	JointNode* shoulderRight = new JointNode(JointType_ShoulderRight, glm::vec3(153, 76, 0)); //orange
 	jointMap[JointType_ShoulderRight] = shoulderRight;
 
-	JointNode* elbowRight = new JointNode(JointType_ElbowRight);
+	JointNode* elbowRight = new JointNode(JointType_ElbowRight, glm::vec3(102, 51, 0)); //dark orange
 	jointMap[JointType_ElbowRight] = elbowRight;
 
-	JointNode* wristRight = new JointNode(JointType_WristRight);
+	JointNode* wristRight = new JointNode(JointType_WristRight, glm::vec3(255, 153, 51)); //light orange
 	jointMap[JointType_WristRight] = wristRight;
 
-	JointNode* handRight = new JointNode(JointType_HandRight);
+	JointNode* handRight = new JointNode(JointType_HandRight, glm::vec3(255, 204, 153)); //tan
 	jointMap[JointType_HandRight] = handRight;
 
-	JointNode* handTipRight = new JointNode(JointType_HandTipRight);
+	JointNode* handTipRight = new JointNode(JointType_HandTipRight, glm::vec3(204, 204, 0)); //yellow
 	jointMap[JointType_HandTipRight] = handTipRight;
 
-	JointNode* thumbRight = new JointNode(JointType_ThumbRight);
+	JointNode* thumbRight = new JointNode(JointType_ThumbRight, glm::vec3(204, 204, 0)); //yellow
 	jointMap[JointType_ThumbRight] = thumbRight;
 
-	JointNode* hipRight = new JointNode(JointType_HipRight);
+	JointNode* hipRight = new JointNode(JointType_HipRight, glm::vec3(0, 1, 0)); //green
 	jointMap[JointType_HipRight] = hipRight;
 
-	JointNode* kneeRight = new JointNode(JointType_KneeRight);
+	JointNode* kneeRight = new JointNode(JointType_KneeRight, glm::vec3(25, 51, 0)); //dark green
 	jointMap[JointType_KneeRight] = kneeRight;
 
-	JointNode* ankleRight = new JointNode(JointType_AnkleRight);
+	JointNode* ankleRight = new JointNode(JointType_AnkleRight, glm::vec3(102, 255, 102)); //light green
 	jointMap[JointType_AnkleRight] = ankleRight;
 
-	JointNode* footRight = new JointNode(JointType_FootRight);
+	JointNode* footRight = new JointNode(JointType_FootRight, glm::vec3(204, 255, 204)); //pale green
 	jointMap[JointType_FootRight] = footRight;
 
 	// Left Side
-	JointNode* shoulderLeft = new JointNode(JointType_ShoulderLeft);
+	JointNode* shoulderLeft = new JointNode(JointType_ShoulderLeft, glm::vec3(0, 0, 1)); //blue
 	jointMap[JointType_ShoulderLeft] = shoulderLeft;
 
-	JointNode* elbowLeft = new JointNode(JointType_ElbowLeft);
+	JointNode* elbowLeft = new JointNode(JointType_ElbowLeft, glm::vec3(0, 0, 51)); //dark blue
 	jointMap[JointType_ElbowLeft] = elbowLeft;
 
-	JointNode* wristLeft = new JointNode(JointType_WristLeft);
+	JointNode* wristLeft = new JointNode(JointType_WristLeft, glm::vec3(0, 204, 204)); //light blue
 	jointMap[JointType_WristLeft] = wristLeft;
 
-	JointNode* handLeft = new JointNode(JointType_HandLeft);
+	JointNode* handLeft = new JointNode(JointType_HandLeft, glm::vec3(0, 102, 102)); //dark cyan
 	jointMap[JointType_HandLeft] = handLeft;
 
-	JointNode* handTipLeft = new JointNode(JointType_HandTipLeft);
+	JointNode* handTipLeft = new JointNode(JointType_HandTipLeft, glm::vec3(153, 204, 255)); //pale blue
 	jointMap[JointType_HandTipLeft] = handTipLeft;
 
-	JointNode* thumbLeft = new JointNode(JointType_ThumbLeft);
+	JointNode* thumbLeft = new JointNode(JointType_ThumbLeft, glm::vec3(153, 204, 255)); //pale blue
 	jointMap[JointType_ThumbLeft] = thumbLeft;
 
-	JointNode* hipLeft = new JointNode(JointType_HipLeft);
+	JointNode* hipLeft = new JointNode(JointType_HipLeft, glm::vec3(76, 0, 153)); //purple
 	jointMap[JointType_HipLeft] = hipLeft;
 
-	JointNode* kneeLeft = new JointNode(JointType_KneeLeft);
+	JointNode* kneeLeft = new JointNode(JointType_KneeLeft, glm::vec3(25, 0, 51)); // dark purple
 	jointMap[JointType_KneeLeft] = kneeLeft;
 
-	JointNode* ankleLeft = new JointNode(JointType_AnkleLeft);
+	JointNode* ankleLeft = new JointNode(JointType_AnkleLeft, glm::vec3(178, 102, 255)); //light purple
 	jointMap[JointType_AnkleLeft] = ankleLeft;
 
-	JointNode* footLeft = new JointNode(JointType_FootLeft);
+	JointNode* footLeft = new JointNode(JointType_FootLeft, glm::vec3(204, 0, 102)); //pink
 	jointMap[JointType_FootLeft] = footLeft;
 
 	// Make Hierarchy
@@ -243,8 +243,8 @@ static void init()
 	prog->addAttribute("aNor");
 	prog->setVerbose(false);
 
-	studentRoot = new JointNode(JointType_SpineBase);
-	teacherRoot = new JointNode(JointType_SpineBase);
+	studentRoot = new JointNode(JointType_SpineBase, glm::vec3(0,0,0));
+	teacherRoot = new JointNode(JointType_SpineBase, glm::vec3(0, 0, 0));
 	initHierarchy(studentRoot, studentJointMap);
 	initHierarchy(teacherRoot, teacherJointMap);
 
@@ -466,7 +466,7 @@ static void render()
 	P->multMatrix(glm::perspective((float)(45.0 * M_PI / 180.0), aspect, 0.01f, 100.0f));
 	// Apply camera transform.
 	MV->pushMatrix();
-	MV->translate(glm::vec3(0, 0, -10));
+	MV->translate(glm::vec3(0, 0, -6));
 
 	// Draw mesh using GLSL.
 	prog->bind();
@@ -479,17 +479,18 @@ static void render()
 			JointNode* cur = s.top();
 			s.pop();
 			MV->pushMatrix();
-			MV->scale(.7, .7, .7);
-			MV->translate(cur->pos);
-			glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
-			sphere->draw(prog);
+				MV->translate(cur->pos);
+				MV->scale(.3, .3, .3);
+				glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
+				sphere->draw(prog);
 			MV->popMatrix();
 			prog->unbind();
 			for (auto* x : cur->limbs) {
 				s.push(x->node);
 				Line l(cur->pos, x->node->pos);
 				l.setColor(getColor(x->norm, glm::vec3(0, 1, 0)));
-				l.setMVP(P->topMatrix());
+				l.setMVP(MV->topMatrix() * P->topMatrix());
+				l.draw();
 			}
 			prog->bind();
 		}
