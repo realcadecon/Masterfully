@@ -272,6 +272,7 @@ void loadJointsIntoHierarchy(Joint* joint, JointNode* root, unordered_map<JointT
 		for (auto* x : cur->limbs) {
 			x->length = glm::distance(x->node->pos, cur->pos);
 			x->norm = glm::normalize(x->node->pos - cur->pos);
+			cout << cur->type << "->" << x->node->type << " x: " << x->norm.x << " y: " << x->norm.y << " z: " << x->norm.z << "\n";
 			s.push(x->node);
 		}
 	}
@@ -493,10 +494,10 @@ static void render()
 			prog->unbind();
 			for (auto* x : cur->limbs) {
 				s.push(x->node);
-				/*Line l(cur->pos, x->node->pos);
+				Line l(cur->pos, x->node->pos);
 				l.setColor(getColor(x->norm, glm::vec3(0, 1, 0)));
 				l.setMVP(MV->topMatrix() * P->topMatrix());
-				l.draw();*/
+				l.draw();
 			}
 			prog->bind();
 		}*/
