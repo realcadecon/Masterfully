@@ -268,7 +268,7 @@ static void init()
 	initHierarchy(studentRoot, studentJointMap);
 	initHierarchy(teacherRoot, teacherJointMap);
 
-	loadTeacherNorms("./resources/yoga.txt");
+	loadTeacherNorms("./resources/tri.txt");
 
 	// If there were any OpenGL errors, this will print something.
 	// You can intersperse this line in your code to find the exact location
