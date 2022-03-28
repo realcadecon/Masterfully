@@ -370,9 +370,6 @@ static void getJointData(vector<Joint*> &bodyJoints) {
 				hr = body->GetJoints(_countof(joints), joints);
 				if (SUCCEEDED(hr)) {
 					bodyJoints.push_back(joints);
-					/*for (auto x : joints) {
-						bodyJoints.push_back(&x);
-					}*/
 					//Let's print the head's position
 					const CameraSpacePoint& headPos = joints[JointType_Head].Position;
 					const CameraSpacePoint& leftHandPos = joints[JointType_HandLeft].Position;
@@ -443,9 +440,6 @@ static void render()
 	// Get Joint data from Kinect
 	vector<Joint*> bodyJoints;
 	getJointData(bodyJoints);
-	if (bodyJoints.size() > 0) {
-		cout << "BJ sz = " << bodyJoints.size() << endl;
-	}
 	// Load Joint data into hierarchy
 	if (bodyJoints.size() > 0) {
 		loadJointsIntoHierarchy(bodyJoints[0], studentRoot, studentJointMap);
