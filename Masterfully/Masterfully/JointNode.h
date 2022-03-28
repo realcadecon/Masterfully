@@ -20,8 +20,8 @@ public:
 	};
 
 	JointType type;
-	glm::vec3 pos;
+	glm::vec3 pos, color;
 	std::vector<Limb*> limbs;
 
-	JointNode(JointType _type): type(_type), pos(glm::vec3(0, 0, 0)) {}
+	JointNode(JointType _type, glm::vec3 _color): type(_type), color(_color), pos(glm::vec3(0, 0, 0)) {}
 };
