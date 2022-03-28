@@ -94,7 +94,7 @@ void character_callback(GLFWwindow* window, unsigned int codepoint)
 
 static void initHierarchy(JointNode *root, unordered_map<JointType, JointNode*> &jointMap) {
 	// Spine Nodes
-	root = new JointNode(JointType_SpineBase);
+	//root = new JointNode(JointType_SpineBase);
 	jointMap[JointType_SpineBase] = root;
 
 	JointNode* spineMid = new JointNode(JointType_SpineMid);
@@ -242,6 +242,8 @@ static void init()
 	prog->addAttribute("aNor");
 	prog->setVerbose(false);
 
+	studentRoot = new JointNode(JointType_SpineBase);
+	teacherRoot = new JointNode(JointType_SpineBase);
 	initHierarchy(studentRoot, studentJointMap);
 	initHierarchy(teacherRoot, teacherJointMap);
 
@@ -368,6 +370,9 @@ static void getJointData(vector<Joint*> &bodyJoints) {
 				hr = body->GetJoints(_countof(joints), joints);
 				if (SUCCEEDED(hr)) {
 					bodyJoints.push_back(joints);
+					/*for (auto x : joints) {
+						bodyJoints.push_back(&x);
+					}*/
 					//Let's print the head's position
 					const CameraSpacePoint& headPos = joints[JointType_Head].Position;
 					const CameraSpacePoint& leftHandPos = joints[JointType_HandLeft].Position;
@@ -438,7 +443,9 @@ static void render()
 	// Get Joint data from Kinect
 	vector<Joint*> bodyJoints;
 	getJointData(bodyJoints);
-
+	if (bodyJoints.size() > 0) {
+		cout << "BJ sz = " << bodyJoints.size() << endl;
+	}
 	// Load Joint data into hierarchy
 	if (bodyJoints.size() > 0) {
 		loadJointsIntoHierarchy(bodyJoints[0], studentRoot, studentJointMap);
@@ -464,7 +471,7 @@ static void render()
 	P->multMatrix(glm::perspective((float)(45.0 * M_PI / 180.0), aspect, 0.01f, 100.0f));
 	// Apply camera transform.
 	MV->pushMatrix();
-	MV->translate(glm::vec3(0, 0, 0));
+	MV->translate(glm::vec3(0, 0, -10));
 
 	// Draw mesh using GLSL.
 	prog->bind();
@@ -517,11 +524,11 @@ int test()
 		glfwTerminate();
 		return -1;
 	}
-	kinectVideoOut = glfwCreateWindow(640, 480, "Kinect Video", NULL, NULL);
+	/*kinectVideoOut = glfwCreateWindow(640, 480, "Kinect Video", NULL, NULL);
 	if (!kinectVideoOut) {
 		glfwTerminate();
 		return -1;
-	}
+	} */
 	// Make the window's context current.
 	glfwMakeContextCurrent(window);
 	// Initialize GLEW.
@@ -540,7 +547,7 @@ int test()
 	glfwSetCharCallback(window, character_callback);
 	// Initialize scene.
 	init();
-	initKinect();
+	//initKinect();
 	// Loop until the user closes the window.
 	double lastTime = glfwGetTime();
 	while (!glfwWindowShouldClose(window)) {
@@ -550,9 +557,9 @@ int test()
 		glfwSwapBuffers(window);
 
 		//kinect video
-		glfwMakeContextCurrent(kinectVideoOut);
-		renderVideo();
-		glfwSwapBuffers(kinectVideoOut);
+		//glfwMakeContextCurrent(kinectVideoOut);
+		//renderVideo();
+		//glfwSwapBuffers(kinectVideoOut);
 		
 		glfwPollEvents();
 		while (glfwGetTime() < lastTime + 1.0/ FRAMERATE) { //frame limiter
