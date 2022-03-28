@@ -1,11 +1,12 @@
 #version 120
 
 varying vec3 vNor;
+varying vec3 col;
 
 void main()
 {
-	vec3 normal = normalize(vNor);
+	//vec3 normal = normalize(vNor);
 	// Map normal in the range [-1, 1] to color in range [0, 1];
-	vec3 color = 0.5*normal + 0.5;
-	gl_FragColor = vec4(color, 1.0);
+	//vec3 color = 0.5*normal + 0.5;
+	gl_FragColor = vec4(col, 1.0);
 }
