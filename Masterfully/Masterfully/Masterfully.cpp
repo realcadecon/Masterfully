@@ -212,6 +212,26 @@ static void initHierarchy(JointNode *root, unordered_map<JointType, JointNode*> 
 	ankleLeft->limbs.push_back(new JointNode::Limb( glm::vec3(0, 0, 0), 0.f, footLeft ));
 }
 
+void loadTeacherNorms(string filename) {
+	ifstream ifs(filename);
+	JointNode* root = teacherRoot;
+	stack<JointNode*> s;
+	float x, y, z;
+	if (ifs.is_open()) {
+		s.push(root);
+		while (!s.empty()) {
+			JointNode* cur = s.top();
+			s.pop();
+			for (auto* l : cur->limbs) {
+				ifs >> x >> y >> z;
+				l->norm = glm::vec3(x, y, z);
+	
+				s.push(l->node);
+			}
+		}
+	}
+}
+
 static void init()
 {
 	GLSL::checkVersion();
@@ -247,6 +267,8 @@ static void init()
 	teacherRoot = new JointNode(JointType_SpineBase, glm::vec3(0, 0, 0));
 	initHierarchy(studentRoot, studentJointMap);
 	initHierarchy(teacherRoot, teacherJointMap);
+
+	loadTeacherNorms("./resources/pose.txt");
 
 	// If there were any OpenGL errors, this will print something.
 	// You can intersperse this line in your code to find the exact location
@@ -438,6 +460,26 @@ glm::vec3 getColor(glm::vec3 sNorm, glm::vec3 tNorm) {
 	return col;
 }
 
+void computeTeacherData() {
+	stack<JointNode*> s;
+	stack<JointNode*> s_t;
+	teacherRoot->pos = studentRoot->pos;
+	s.push(studentRoot);
+	s_t.push(teacherRoot);
+	while (!s.empty()) {
+		JointNode* cur = s.top();
+		s.pop();
+		JointNode* cur_t = s_t.top();
+		s_t.pop();
+		for (int i = 0; i < cur_t->limbs.size(); ++i) {
+			cur_t->limbs[i]->length = cur->limbs[i]->length;
+			cur_t->limbs[i]->node->pos = cur_t->pos + (cur_t->limbs[i]->length * cur_t->limbs[i]->norm);
+			s.push(cur->limbs[i]->node);
+			s_t.push(cur_t->limbs[i]->node);
+		}
+	}
+}
+
 static void render()
 {
 	// Get Joint data from Kinect
@@ -446,6 +488,7 @@ static void render()
 	// Load Joint data into hierarchy
 	if (bodyJoints[0].Position.X != 0) {
 		loadJointsIntoHierarchy(bodyJoints, studentRoot, studentJointMap);
+		computeTeacherData();
 	}
 	else {
 		cerr << "No Body Detected\n";
@@ -475,11 +518,15 @@ static void render()
 	glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, &P->topMatrix()[0][0]);
 	MV->pushMatrix();
 	stack<JointNode*> s;
+	stack<JointNode*> s_t;
 	if (bodyJoints != nullptr) {
 		s.push(studentRoot);
+		s_t.push(teacherRoot);
 		while (!s.empty()) {
 			JointNode* cur = s.top();
+			JointNode* cur_t = s_t.top();
 			s.pop();
+			s_t.pop();
 			MV->pushMatrix();
 				MV->translate(cur->pos);
 				MV->scale(.2, .2, .2);
@@ -487,14 +534,31 @@ static void render()
 				glUniform3f(prog->getUniform("col"), cur->color.r, cur->color.g, cur->color.b);
 				sphere->draw(prog);
 			MV->popMatrix();
+			MV->pushMatrix();
+				MV->translate(cur_t->pos);
+				MV->scale(.2, .2, .2);
+				glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
+				glUniform3f(prog->getUniform("col"), 200.f, 200.f, 200.f);
+				sphere->draw(prog);
+			MV->popMatrix();
 			prog->unbind();
-			for (auto* x : cur->limbs) {
+			for (int i = 0; i < cur_t->limbs.size(); ++i) {
+				auto* x = cur->limbs[i];
+				auto* x_t = cur_t->limbs[i];
 				s.push(x->node);
+				s_t.push(x->node);
+				x->node->color = getColor(x->norm, x_t->norm);
 				Line l(cur->pos, x->node->pos);
-				l.setColor(getColor(x->norm, glm::vec3(0, 1, 0)));
+				l.setColor(getColor(x->norm, x_t->norm));
 				glm::mat4 view = lookAt(glm::vec3(0, 0, 7), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 				l.setMVP(P->topMatrix() * view);
 				l.draw();
+
+				Line l_t(cur_t->pos, x_t->node->pos);
+				l_t.setColor(glm::vec3(200, 200, 200));
+
+				l_t.setMVP(P->topMatrix() * view);
+				l_t.draw();
 			}
 			prog->bind();
 		}
