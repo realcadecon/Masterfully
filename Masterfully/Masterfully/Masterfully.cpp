@@ -238,6 +238,7 @@ static void init()
 	prog->init();
 	prog->addUniform("P");
 	prog->addUniform("MV");
+	prog->addUniform("col");
 	prog->addAttribute("aPos");
 	prog->addAttribute("aNor");
 	prog->setVerbose(false);
