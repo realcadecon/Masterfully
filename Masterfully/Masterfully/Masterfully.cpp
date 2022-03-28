@@ -402,7 +402,9 @@ static void getJointData(Joint* bodyJoints) {
 					const CameraSpacePoint& headPos = joints[JointType_Head].Position;
 					const CameraSpacePoint& leftHandPos = joints[JointType_HandLeft].Position;
 
-
+					if (leftHandPos.Y > headPos.Y) {
+						std::cout << "DATA START\n";
+					}
 
 					HandState leftHandState;
 					hr = body->get_HandLeftState(&leftHandState);
