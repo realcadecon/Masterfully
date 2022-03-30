@@ -5,7 +5,6 @@
 #include "Masterfully.h"
 
 #define _USE_MATH_DEFINES
-#define PI 3.14159265
 #include <cmath>
 #include <iostream>
 #include <vector>
