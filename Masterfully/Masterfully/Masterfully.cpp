@@ -312,7 +312,7 @@ static void init()
 	initHierarchy(studentRoot, studentJointMap);
 	initHierarchy(teacherRoot, teacherJointMap);
 
-	loadTeacherNorms("./resources/tri.txt");
+	loadTeacherNorms("./resources/warrior2.txt");
 
 	// If there were any OpenGL errors, this will print something.
 	// You can intersperse this line in your code to find the exact location
@@ -593,7 +593,7 @@ static void render()
 			glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, &P->topMatrix()[0][0]);
 			MV->pushMatrix();
 				MV->translate(cur_t->pos);
-				MV->translate(0, 0, -.01);
+				MV->translate(0, 0, -.5);
 				MV->scale(.15, .15, .15);
 				glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
 				glUniform3f(prog->getUniform("col"), 200.f, 200.f, 200.f);
@@ -623,6 +623,7 @@ static void render()
 				prog->bind();
 				glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, &P->topMatrix()[0][0]);
 				MV->pushMatrix();
+					MV->translate(0, 0, -.5);
 					MV->translate(cur_t->pos);
 					MV->rotate(glm::acos(glm::dot(glm::vec3(0, 1, 0), x_t->norm)), glm::cross(glm::vec3(0, 1, 0), x_t->norm));
 					MV->translate(glm::vec3(0, x_t->length / 2.f, 0));
