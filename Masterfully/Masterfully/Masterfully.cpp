@@ -37,6 +37,7 @@ GLFWwindow* window; // Main application window
 GLFWwindow* kinectVideoOut; //RGB kinect video output
 string RES_DIR = "./resources/"; // Where data files live
 shared_ptr<Program> prog;
+shared_ptr<Program> BPprog;
 shared_ptr<Shape> shape;
 shared_ptr<Shape> sphere;
 JointNode* studentRoot;
@@ -231,6 +232,37 @@ void loadTeacherNorms(string filename) {
 	}
 }
 
+void TEST_loadStudentData(string filename) {
+	ifstream ifs(filename);
+	JointNode* root = studentRoot;
+	stack<JointNode*> s;
+	float x, y, z;
+	if (ifs.is_open()) {
+		s.push(root);
+		while (!s.empty()) {
+			JointNode* cur = s.top();
+			s.pop();
+			ifs >> x >> y >> z;
+			cur->pos = 3.f * glm::vec3(x, y, z);
+			for (auto* l : cur->limbs) {
+				s.push(l->node);
+			}
+		}
+
+		s.push(root);
+		while (!s.empty()) {
+			JointNode* cur = s.top();
+			s.pop();
+			for (auto* x : cur->limbs) {
+				x->length = glm::distance(x->node->pos, cur->pos);
+				x->norm = glm::normalize(x->node->pos - cur->pos);
+				cout << x->norm.x << " " << x->norm.y << " " << x->norm.z << "\n";
+				s.push(x->node);
+			}
+		}
+	}
+}
+
 static void init()
 {
 	GLSL::checkVersion();
@@ -261,6 +293,19 @@ static void init()
 	prog->addAttribute("aPos");
 	prog->addAttribute("aNor");
 	prog->setVerbose(false);
+
+	// BP Shader
+	BPprog = make_shared<Program>();
+	BPprog->setShaderNames(RES_DIR + "blinn-phong" + "_vert.glsl", RES_DIR + "blinn-phong" + "_frag.glsl");
+	BPprog->setVerbose(true);
+	BPprog->init();
+	BPprog->addAttribute("aPos");
+	BPprog->addAttribute("aNor");
+	BPprog->addUniform("MV");
+	BPprog->addUniform("P");
+	BPprog->addUniform("VM");
+	BPprog->addUniform("col");
+	BPprog->setVerbose(false);
 
 	studentRoot = new JointNode(JointType_SpineBase, glm::vec3(0,0,0));
 	teacherRoot = new JointNode(JointType_SpineBase, glm::vec3(0, 0, 0));
@@ -492,6 +537,9 @@ static void render()
 		computeTeacherData();
 	}
 	else {
+		// FOR TESTING
+		//TEST_loadStudentData("./resources/test.txt");
+		//computeTeacherData();
 		cerr << "No Body Detected\n";
 	}
 
@@ -515,55 +563,76 @@ static void render()
 	MV->translate(glm::vec3(0, 0, -7));
 
 	// Draw mesh using GLSL.
-	prog->bind();
-	glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, &P->topMatrix()[0][0]);
+
 	MV->pushMatrix();
 	stack<JointNode*> s;
 	stack<JointNode*> s_t;
+	// FOR TESTING:
+	// if(true) {
 	if (bodyJoints != nullptr) {
 		s.push(studentRoot);
 		s_t.push(teacherRoot);
 		while (!s.empty()) {
+			BPprog->bind();
+			glUniformMatrix4fv(BPprog->getUniform("P"), 1, GL_FALSE, &P->topMatrix()[0][0]);
 			JointNode* cur = s.top();
 			JointNode* cur_t = s_t.top();
 			s.pop();
 			s_t.pop();
 			MV->pushMatrix();
 				MV->translate(cur->pos);
-				MV->scale(.2, .2, .2);
-				glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
-				glUniform3f(prog->getUniform("col"), cur->color.r, cur->color.g, cur->color.b);
-				sphere->draw(prog);
+				MV->scale(.15, .15, .15);
+				glUniformMatrix4fv(BPprog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
+				glm::mat4 VM = glm::transpose(glm::inverse(MV->topMatrix()));
+				glUniformMatrix4fv(BPprog->getUniform("VM"), 1, GL_FALSE, &VM[0][0]);
+				glUniform3f(BPprog->getUniform("col"), cur->color.r, cur->color.g, cur->color.b);
+				sphere->draw(BPprog);
 			MV->popMatrix();
+			BPprog->unbind();
+			prog->bind();
+			glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, &P->topMatrix()[0][0]);
 			MV->pushMatrix();
 				MV->translate(cur_t->pos);
-				MV->translate(0, 0, -.5);
-				MV->scale(.2, .2, .2);
+				MV->translate(0, 0, -.01);
+				MV->scale(.15, .15, .15);
 				glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
 				glUniform3f(prog->getUniform("col"), 200.f, 200.f, 200.f);
 				sphere->draw(prog);
 			MV->popMatrix();
 			prog->unbind();
 			for (int i = 0; i < cur_t->limbs.size(); ++i) {
+				BPprog->bind();
+				glUniformMatrix4fv(BPprog->getUniform("P"), 1, GL_FALSE, &P->topMatrix()[0][0]);
 				auto* x = cur->limbs[i];
 				auto* x_t = cur_t->limbs[i];
 				s.push(x->node);
 				s_t.push(x_t->node);
 				x->node->color = getColor(x->norm, x_t->norm);
-
-				Line l(cur->pos, x->node->pos);
-				l.setColor(getColor(x->norm, x_t->norm));
-				glm::mat4 view = lookAt(glm::vec3(0, 0, 7), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-				l.setMVP(P->topMatrix() * view);
-				l.draw();
-
-				Line l_t(cur_t->pos, x_t->node->pos);
-				l_t.setColor(glm::vec3(200, 200, 200));
-
-				l_t.setMVP(P->topMatrix() * view);
-				l_t.draw();
+				MV->pushMatrix();
+					MV->translate(cur->pos);
+					MV->rotate(glm::acos(glm::dot(glm::vec3(0, 1, 0), x->norm)), glm::cross(glm::vec3(0, 1, 0), x->norm));
+					MV->translate(glm::vec3(0, x->length / 2.f, 0));
+					MV->scale(glm::vec3(0.08, x->length, 0.08));
+					glUniformMatrix4fv(BPprog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
+					glm::mat4 VM = glm::transpose(glm::inverse(MV->topMatrix()));
+					glUniformMatrix4fv(BPprog->getUniform("VM"), 1, GL_FALSE, &VM[0][0]);
+					glUniform3f(BPprog->getUniform("col"), x->node->color.r, x->node->color.g, x->node->color.b);
+					shape->draw(BPprog);
+				MV->popMatrix();
+				BPprog->unbind();
+				prog->bind();
+				glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, &P->topMatrix()[0][0]);
+				MV->pushMatrix();
+					MV->translate(cur_t->pos);
+					MV->rotate(glm::acos(glm::dot(glm::vec3(0, 1, 0), x_t->norm)), glm::cross(glm::vec3(0, 1, 0), x_t->norm));
+					MV->translate(glm::vec3(0, x_t->length / 2.f, 0));
+					MV->scale(glm::vec3(0.08, x_t->length, 0.08));
+					glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
+					glUniform3f(prog->getUniform("col"), 200.f, 200.f, 200.f);
+					shape->draw(prog);
+				MV->popMatrix();
+				prog->unbind();
 			}
-			prog->bind();
 		}
 	}
 	MV->popMatrix();
