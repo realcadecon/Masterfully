@@ -51,7 +51,7 @@ GLubyte textureData[640 * 480 * 4]; // BGRA array containing the texture data
 
 IKinectSensor* sensor = nullptr;
 IBodyFrameReader* bodyFrameReader = nullptr;
-IColorFrameReader* colorFramerReader = nullptr;
+IColorFrameReader* colorFrameReader = nullptr;
 HRESULT hr;
 #define MAX_LOADSTRING 100
 
@@ -344,80 +344,111 @@ void loadJointsIntoHierarchy(Joint* joint, JointNode* root, unordered_map<JointT
 	}
 }
 
-static bool initKinect() {
-	if (FAILED(GetDefaultKinectSensor(&sensor))) {
-		return false;
-	}
-	if (sensor) {
-		sensor->Open();
-
-		IColorFrameSource* framesource = NULL;
-		sensor->get_ColorFrameSource(&framesource);
-		framesource->OpenReader(&colorFramerReader);
-		if (framesource) {
-			framesource->Release();
-			framesource = NULL;
+static void getRGBVideo() {
+	IColorFrame* frame;
+	//Color Frame Source
+	IColorFrameSource* colorFrameSource = nullptr;
+	hr = sensor->get_ColorFrameSource(&colorFrameSource);
+	if (SUCCEEDED(hr)) {
+		//Color Frame Reader
+		hr = colorFrameSource->OpenReader(&colorFrameReader);
+		if (FAILED(hr)) {
+			cerr << "Failed to get Color Frame Reader." << endl;
+			safeRelease(colorFrameSource);
+			return;
 		}
-		return true;
+		safeRelease(colorFrameSource);
+		cout << "Opened color frame reader" << endl;
+
+		//Get Color Frame
+		hr = colorFrameReader->AcquireLatestFrame(&frame);
+		if (FAILED(hr)) {
+			if (hr == E_PENDING) {
+				cout << "Color frames pending" << endl;
+			}
+			else if(hr == E_FAIL) {
+				cerr << "Failed to get Color Frames." << endl;
+			}
+			safeRelease(colorFrameReader);
+			return;
+		}
+		safeRelease(colorFrameReader);
+		cout << "Got lastest color frame" << endl;
+
+		hr = frame->CopyConvertedFrameDataToArray(640 * 480 * 4, textureData, ColorImageFormat_Bgra);
+		if (FAILED(hr)) {
+			cerr << "Failed to copy frame data" << endl;
+		}
+		cout << "Copying frame data" << endl;
+		
+
+		// Initialize textures
+		glGenTextures(1, &textureId);
+		glBindTexture(GL_TEXTURE_2D, textureId);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 640, 480,
+			0, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)textureData);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		// OpenGL setup
+		glClearColor(0, 0, 0, 0);
+		glClearDepth(1.0f);
+		glEnable(GL_TEXTURE_2D);
+
+		// Camera setup
+		glViewport(0, 0, 640, 480);
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(0, 640, 480, 0, 1, -1);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+
+		//draw frames
+		glBindTexture(GL_TEXTURE_2D, textureId);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 640, 480, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)textureData);
+
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glBegin(GL_QUADS);
+			glTexCoord2f(0.0f, 0.0f);
+			glVertex3f(0, 0, 0);
+			glTexCoord2f(1.0f, 0.0f);
+			glVertex3f(640, 0, 0);
+			glTexCoord2f(1.0f, 1.0f);
+			glVertex3f(640, 480, 0.0f);
+			glTexCoord2f(0.0f, 1.0f);
+			glVertex3f(0, 480, 0.0f);
+		glEnd();
+
+		glDrawPixels(640, 480, GL_RGB, GL_UNSIGNED_BYTE, textureData);
+
+		safeRelease(frame);
 	}
-	else {
-		return false;
+	else if (FAILED(hr)) {
+		cerr << "Failed to get Color Frame Source." << endl;
+		return;
 	}
-}
-
-static void renderVideo() {
-	IColorFrame* frame = NULL;
-	if (SUCCEEDED(colorFramerReader->AcquireLatestFrame(&frame))) {
-		frame->CopyConvertedFrameDataToArray(640 * 480 * 4, textureData, ColorImageFormat_Bgra);
-	}
-	if (frame) frame->Release();
-
-	// Initialize textures
-	glGenTextures(1, &textureId);
-	glBindTexture(GL_TEXTURE_2D, textureId);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 640, 480,
-		0, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)textureData);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	// OpenGL setup
-	glClearColor(0, 0, 0, 0);
-	glClearDepth(1.0f);
-	glEnable(GL_TEXTURE_2D);
-
-	// Camera setup
-	glViewport(0, 0, 640, 480);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0, 640, 480, 0, 1, -1);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	//draw frames
-	glBindTexture(GL_TEXTURE_2D, textureId);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 640, 480, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)textureData);
-
-	// Clear framebuffer.
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glBegin(GL_QUADS);
-		glTexCoord2f(0.0f, 0.0f);
-		glVertex3f(0, 0, 0);
-		glTexCoord2f(1.0f, 0.0f);
-		glVertex3f(640, 0, 0);
-		glTexCoord2f(1.0f, 1.0f);
-		glVertex3f(640, 480, 0.0f);
-		glTexCoord2f(0.0f, 1.0f);
-		glVertex3f(0, 480, 0.0f);
-	glEnd();
 
 }
 
 static void getJointData(Joint* bodyJoints) {
-	IBodyFrame* bodyFrame = nullptr;
-	hr = bodyFrameReader->AcquireLatestFrame(&bodyFrame);
+	IBodyFrameSource* bodyFrameSource = nullptr;
+	hr = sensor->get_BodyFrameSource(&bodyFrameSource);
 
 	if (SUCCEEDED(hr)) {
+		hr = bodyFrameSource->OpenReader(&bodyFrameReader);
+	}
+	else if (FAILED(hr)) {
+		cerr << "Failed to open body frame reader" << endl;
+		safeRelease(bodyFrameSource);
+		return;
+	}
+	safeRelease(bodyFrameSource);
+
+	IBodyFrame* bodyFrame = nullptr;
+	hr = bodyFrameReader->AcquireLatestFrame(&bodyFrame);
+	if (SUCCEEDED(hr)) {
+		safeRelease(bodyFrameReader);
 		IBody* bodies[BODY_COUNT] = { 0 };
 		hr = bodyFrame->GetAndRefreshBodyData(_countof(bodies), bodies);
 
@@ -643,6 +674,15 @@ static void render()
 	MV->popMatrix();
 	P->popMatrix();
 
+
+	//RGB display
+	double scale = 0.2;
+	glViewport(0, 0, scale * width, scale * height);
+	glEnable(GL_SCISSOR_TEST);
+	glScissor(0, 0, scale * width, scale * height);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glDisable(GL_SCISSOR_TEST);
+
 	GLSL::checkError(GET_FILE_LINE);
 }
 
@@ -661,11 +701,13 @@ int test()
 		glfwTerminate();
 		return -1;
 	}
-	/*kinectVideoOut = glfwCreateWindow(640, 480, "Kinect Video", NULL, NULL);
+	//RGB Video window
+	kinectVideoOut = glfwCreateWindow(640, 480, "Kinect Video", NULL, NULL);
 	if (!kinectVideoOut) {
 		glfwTerminate();
 		return -1;
-	} */
+	} 
+
 	// Make the window's context current.
 	glfwMakeContextCurrent(window);
 	// Initialize GLEW.
@@ -694,9 +736,9 @@ int test()
 		glfwSwapBuffers(window);
 
 		//kinect video
-		//glfwMakeContextCurrent(kinectVideoOut);
-		//renderVideo();
-		//glfwSwapBuffers(kinectVideoOut);
+		glfwMakeContextCurrent(kinectVideoOut);
+		getRGBVideo();
+		glfwSwapBuffers(kinectVideoOut);
 		
 		glfwPollEvents();
 		while (glfwGetTime() < lastTime + 1.0/ FRAMERATE) { //frame limiter
@@ -749,6 +791,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 			//We're done with bodyFrameSource, so we'll release it
 			safeRelease(bodyFrameSource);
+			safeRelease(bodyFrameReader);
 		}
 	}
 	else {
