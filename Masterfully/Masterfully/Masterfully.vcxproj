@@ -72,7 +72,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)resources\includes;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)resources\includes;$(ProjectDir)resources\includes\freetype;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)resources\libs;$(LibraryPath)</LibraryPath>
     <GlfwLinkage>static</GlfwLinkage>
     <Linkage-glew>static</Linkage-glew>
@@ -86,8 +86,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <LibraryPath>C:\Users\wbh19\Documents\Masterfully\Masterfully\Masterfully\resources\libs;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(WindowsSDK_IncludePath);$(VC_IncludePath);C:\Users\wbh19\Documents\Masterfully\Masterfully\Masterfully\resources\includes</IncludePath>
+    <LibraryPath>$(ProjectDir)resources\x64\libs;$(VCInstallDir)lib\x64;$(VCInstallDir)atlmfc\lib\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)resources\includes;$(ProjectDir)resources\includes\freetype;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -103,7 +103,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Kinect20.Fusion.lib;Kinect20.lib;Kinect20.VisualGestureBuilder.lib;Kinect20.Face.lib;glew32s.lib;glfw3.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>freetype.lib;Kinect20.Fusion.lib;Kinect20.lib;Kinect20.VisualGestureBuilder.lib;Kinect20.Face.lib;glew32s.lib;glfw3.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -134,7 +134,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glew32.lib;glew32s.lib;glfw3.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>freetype.lib;Kinect20.Fusion.lib;Kinect20.lib;Kinect20.VisualGestureBuilder.lib;Kinect20.Face.lib;glew32s.lib;glfw3.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\lib\x64</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -165,6 +166,7 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Shape.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Text.h" />
     <ClInclude Include="tiny_obj_loader.h" />
   </ItemGroup>
   <ItemGroup>
@@ -174,6 +176,7 @@
     <ClCompile Include="MatrixStack.cpp" />
     <ClCompile Include="Program.cpp" />
     <ClCompile Include="Shape.cpp" />
+    <ClCompile Include="Text.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Masterfully.rc" />
@@ -184,6 +187,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="resources\blinn-phong_frag.glsl" />
+    <None Include="resources\blinn-phong_vert.glsl" />
+    <None Include="resources\FT_frag.glsl" />
+    <None Include="resources\FT_vert.glsl" />
+    <None Include="resources\simple_frag.glsl" />
+    <None Include="resources\simple_vert.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

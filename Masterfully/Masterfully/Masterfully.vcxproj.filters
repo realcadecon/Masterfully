@@ -51,6 +51,9 @@
     <ClInclude Include="Line.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Text.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Masterfully.cpp">
@@ -71,6 +74,9 @@
     <ClCompile Include="Shape.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Text.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Masterfully.rc">
@@ -87,5 +93,23 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="resources\blinn-phong_frag.glsl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="resources\blinn-phong_vert.glsl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="resources\FT_frag.glsl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="resources\FT_vert.glsl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="resources\simple_frag.glsl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="resources\simple_vert.glsl">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

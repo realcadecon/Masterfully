@@ -30,6 +30,9 @@
 #include "JointNode.h"
 #include "Line.h"
 #include <inc/Kinect.h>
+#include <ft2build.h>
+#include <freetype/freetype.h>
+#include "Text.h"
 
 using namespace std;
 
@@ -38,6 +41,7 @@ GLFWwindow* kinectVideoOut; //RGB kinect video output
 string RES_DIR = "./resources/"; // Where data files live
 shared_ptr<Program> prog;
 shared_ptr<Program> BPprog;
+shared_ptr<Program> FTprog;
 shared_ptr<Shape> shape;
 shared_ptr<Shape> sphere;
 JointNode* studentRoot;
@@ -53,6 +57,11 @@ IKinectSensor* sensor = nullptr;
 IBodyFrameReader* bodyFrameReader = nullptr;
 IColorFrameReader* colorFramerReader = nullptr;
 HRESULT hr;
+
+const int FONT_HEIGHT = 48;
+std::map<char, Character> characters;
+unsigned int VAO, VBO;
+
 #define MAX_LOADSTRING 100
 
 // Global Variables:
@@ -307,10 +316,55 @@ static void init()
 	BPprog->addUniform("col");
 	BPprog->setVerbose(false);
 
+	// FreeType Shader
+	FTprog = make_shared<Program>();
+	FTprog->setShaderNames(RES_DIR + "FT" + "_vert.glsl", RES_DIR + "FT" + "_frag.glsl");
+	FTprog->setVerbose(true);
+	FTprog->init();
+	FTprog->addUniform("text");
+	FTprog->addUniform("textColor");
+	FTprog->addUniform("projection");
+	FTprog->setVerbose(true);
+
 	studentRoot = new JointNode(JointType_SpineBase, glm::vec3(0,0,0));
 	teacherRoot = new JointNode(JointType_SpineBase, glm::vec3(0, 0, 0));
 	initHierarchy(studentRoot, studentJointMap);
 	initHierarchy(teacherRoot, teacherJointMap);
+
+	FT_Library ft;
+	if (FT_Init_FreeType(&ft))
+	{
+		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+		return ;
+	}
+
+	string fontFile = "./resources/fonts/arial.ttf";
+	FT_Face face;
+	if (FT_New_Face(ft, fontFile.c_str(), 0, &face))
+	{
+		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+	}
+
+	FT_Set_Pixel_Sizes(face, 0, FONT_HEIGHT);
+
+	Text::loadCharacters(face, characters);
+
+	FT_Done_Face(face);
+	FT_Done_FreeType(ft);
+
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 
 	loadTeacherNorms("./resources/warrior2.txt");
 
@@ -506,6 +560,13 @@ glm::vec3 getColor(glm::vec3 sNorm, glm::vec3 tNorm) {
 	return col;
 }
 
+float getGrade(glm::vec3 sNorm, glm::vec3 tNorm) {
+	float ang = glm::acos(glm::dot(sNorm, tNorm));
+	float val = max(1.0 - (ang / (M_PI / 2)), 0.0);
+	
+	return val;
+}
+
 void computeTeacherData() {
 	stack<JointNode*> s;
 	stack<JointNode*> s_t;
@@ -538,10 +599,15 @@ static void render()
 	}
 	else {
 		// FOR TESTING
-		//TEST_loadStudentData("./resources/test.txt");
-		//computeTeacherData();
+		TEST_loadStudentData("./resources/test.txt");
+		computeTeacherData();
 		cerr << "No Body Detected\n";
 	}
+
+	// Grade variable
+	float grade_sum = 0;
+	float grade_min = 1.f;
+	JointType grade_min_type;
 
 	// Get current frame buffer size.
 	int width = 0, height = 0;
@@ -568,17 +634,20 @@ static void render()
 	stack<JointNode*> s;
 	stack<JointNode*> s_t;
 	// FOR TESTING:
-	// if(true) {
-	if (bodyJoints != nullptr) {
+	Text::renderText(FTprog, "test", 0, 0, 1, glm::vec3(1, 0, 0), VAO, VBO, characters, window);
+    
+	if(true) {
+	//if (bodyJoints != nullptr) {
 		s.push(studentRoot);
 		s_t.push(teacherRoot);
 		while (!s.empty()) {
 			BPprog->bind();
 			glUniformMatrix4fv(BPprog->getUniform("P"), 1, GL_FALSE, &P->topMatrix()[0][0]);
-			JointNode* cur = s.top();
-			JointNode* cur_t = s_t.top();
+			JointNode* cur = s.top(); // Current Student Joint
+			JointNode* cur_t = s_t.top(); // Current Teacher Joint
 			s.pop();
 			s_t.pop();
+			// Draw student joint
 			MV->pushMatrix();
 				MV->translate(cur->pos);
 				MV->scale(.15, .15, .15);
@@ -589,6 +658,7 @@ static void render()
 				sphere->draw(BPprog);
 			MV->popMatrix();
 			BPprog->unbind();
+			// Draw teacher joint
 			prog->bind();
 			glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, &P->topMatrix()[0][0]);
 			MV->pushMatrix();
@@ -600,7 +670,9 @@ static void render()
 				sphere->draw(prog);
 			MV->popMatrix();
 			prog->unbind();
+			// Draw limbs between joints
 			for (int i = 0; i < cur_t->limbs.size(); ++i) {
+				// Draw student limb
 				BPprog->bind();
 				glUniformMatrix4fv(BPprog->getUniform("P"), 1, GL_FALSE, &P->topMatrix()[0][0]);
 				auto* x = cur->limbs[i];
@@ -608,6 +680,12 @@ static void render()
 				s.push(x->node);
 				s_t.push(x_t->node);
 				x->node->color = getColor(x->norm, x_t->norm);
+				float tmp_grade = getGrade(x->norm, x_t->norm);
+				grade_sum += tmp_grade;
+				if (tmp_grade < grade_min) {
+					grade_min = tmp_grade;
+					grade_min_type = x->node->type;
+				}
 				MV->pushMatrix();
 					MV->translate(cur->pos);
 					MV->rotate(glm::acos(glm::dot(glm::vec3(0, 1, 0), x->norm)), glm::cross(glm::vec3(0, 1, 0), x->norm));
@@ -620,6 +698,7 @@ static void render()
 					shape->draw(BPprog);
 				MV->popMatrix();
 				BPprog->unbind();
+				// Draw teacher limb
 				prog->bind();
 				glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, &P->topMatrix()[0][0]);
 				MV->pushMatrix();
@@ -636,6 +715,8 @@ static void render()
 			}
 		}
 	}
+	string grade_out = std::to_string(100.0*grade_sum/25.0);
+	Text::renderText(FTprog, grade_out, 0 + 5, height - FONT_HEIGHT - 5, 1, glm::vec3(0, 0, 0), VAO, VBO, characters, window);
 	MV->popMatrix();
 	prog->unbind();
 
