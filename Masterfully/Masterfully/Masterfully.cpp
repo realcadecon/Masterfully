@@ -715,6 +715,7 @@ static void render()
 			}
 		}
 	}
+	// Render the Grade
 	string grade_out = std::to_string(100.0*grade_sum/25.0);
 	Text::renderText(FTprog, grade_out, 0 + 5, height - FONT_HEIGHT - 5, 1, glm::vec3(0, 0, 0), VAO, VBO, characters, window);
 	MV->popMatrix();
