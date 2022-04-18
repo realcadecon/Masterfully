@@ -43,6 +43,7 @@ string RES_DIR = "./resources/"; // Where data files live
 shared_ptr<Program> prog;
 shared_ptr<Program> BPprog;
 shared_ptr<Program> FTprog;
+shared_ptr<Program> TEXprog;
 shared_ptr<Shape> shape;
 shared_ptr<Shape> sphere;
 JointNode* studentRoot;
@@ -55,6 +56,7 @@ GLuint textureId;			 // ID of the texture to contain Kinect RGB Data
 GLubyte textureData[640 * 480 * 4]; // BGRA array containing the texture data
 int indCountQ = 0;
 map<string, GLuint> qBufIDs;
+shared_ptr<Texture> poseTexture;
 
 IKinectSensor* sensor = nullptr;
 IBodyFrameReader* bodyFrameReader = nullptr;
@@ -66,11 +68,12 @@ std::map<char, Character> characters;
 unsigned int VAO, VBO;
 
 struct Pose {
-	string name, src;
+	string name, src, srcPic;
 
-	Pose(string _name, string _src) {
+	Pose(string _name, string _src, string _srcPic) {
 		name = _name;
 		src = _src;
+		srcPic = _srcPic;
 	}
 };
 
@@ -384,6 +387,23 @@ static void init()
 
 	//loadTeacherNorms("./resources/warrior2.txt");
 	loadTeacherNorms(poses[currPose].src);
+
+	//texture Shader
+	TEXprog = make_shared<Program>();
+	TEXprog->setVerbose(true);
+	TEXprog->setShaderNames(RES_DIR + "texture_vert.glsl", RES_DIR + "texture_frag.glsl");
+	TEXprog->init();
+	TEXprog->addUniform("P");
+	TEXprog->addUniform("MV");
+	TEXprog->addUniform("texture");
+	TEXprog->addAttribute("aPos");
+	TEXprog->setVerbose(false);
+
+	poseTexture = make_shared<Texture>();
+	poseTexture->setFilename(poses[currPose].srcPic);
+	poseTexture->init();
+	poseTexture->setUnit(0);
+	poseTexture->setWrapModes(GL_REPEAT, GL_REPEAT);
 
 	//texture quad
 	vector<float> posBufQ;
@@ -892,6 +912,33 @@ static void render()
 		sphere->draw(prog);
 		MV->popMatrix();
 		prog->unbind();
+		
+		//textured Quad
+		TEXprog->bind();
+		poseTexture->bind(TEXprog->getUniform("texture"));
+		P->pushMatrix();
+		MV->pushMatrix();
+		glEnableVertexAttribArray(TEXprog->getAttribute("aPos"));
+		GLSL::checkError(GET_FILE_LINE);
+		glBindBuffer(GL_ARRAY_BUFFER, qBufIDs["bPos"]);
+		glVertexAttribPointer(TEXprog->getAttribute("aPos"), 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, qBufIDs["bInd"]);
+		MV->pushMatrix();
+		MV->translate(0, 0, -3);
+			glUniformMatrix4fv(TEXprog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
+			glDrawElements(GL_TRIANGLES, indCountQ, GL_UNSIGNED_INT, (void*)0);
+		MV->popMatrix();
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glDisableVertexAttribArray(TEXprog->getAttribute("aNor"));
+		glDisableVertexAttribArray(TEXprog->getAttribute("aPos"));
+
+		MV->popMatrix();
+		P->popMatrix();
+
+		TEXprog->unbind();
+
+
 	}
 	//Render title
 	Text::renderText(FTprog, poses[currPose].name, 200, height - FONT_HEIGHT - 5, 1, glm::vec3(0, 0, 0), VAO, VBO, characters, window);
@@ -925,21 +972,21 @@ static void render()
 int test()
 {
 	//load poses
-	Pose war1("Warrior I", "./resources/warrior1.txt");
+	Pose war1("Warrior I", "./resources/warrior1.txt", "./resources/warrior1.txt");
 	poses.push_back(war1);
-	Pose war2("Warrior II", "./resources/warrior2.txt");
+	Pose war2("Warrior II", "./resources/warrior2.txt", "./resources/warrior1.txt");
 	poses.push_back(war2);
-	Pose tri("Extended Triangle", "./resources/tri.txt");
+	Pose tri("Extended Triangle", "./resources/tri.txt", "./resources/warrior1.txt");
 	poses.push_back(tri);
-	Pose lotus("Lotus Pose", "./resources/lotus.txt");
+	Pose lotus("Lotus Pose", "./resources/lotus.txt", "./resources/warrior1.txt");
 	poses.push_back(lotus);
-	Pose upDog("Upward-Facing Dog", "./resources/upwardDog.txt");
+	Pose upDog("Upward-Facing Dog", "./resources/upwardDog.txt", "./resources/warrior1.txt");
 	poses.push_back(upDog);	
-	Pose lordDance("Lord of the Dance", "./resources/lordOfDance.txt");
+	Pose lordDance("Lord of the Dance", "./resources/lordOfDance.txt", "./resources/warrior1.txt");
 	poses.push_back(lordDance);
-	Pose sideStretch("Intense Side Stretch", "./resources/sideStretch.txt");
+	Pose sideStretch("Intense Side Stretch", "./resources/sideStretch.txt", "./resources/warrior1.txt");
 	poses.push_back(sideStretch);	
-	Pose downDog("Downward Facing Dog", "./resources/downDog.txt");
+	Pose downDog("Downward Facing Dog", "./resources/downDog.txt", "./resources/warrior1.txt");
 	poses.push_back(downDog);
 	currPose = 7;
 	//Pose war1("war1", "./resources/warrior1.txt");
