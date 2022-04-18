@@ -53,9 +53,7 @@ GLubyte textureData[640 * 480 * 4]; // BGRA array containing the texture data
 IKinectSensor* sensor = nullptr;
 IBodyFrameReader* bodyFrameReader = nullptr;
 
-IColorFrame* colorFrame = nullptr;
-IColorFrameReader* colorFrameReader = nullptr;
-IColorFrameReference* colorFrameReference = nullptr;
+
 HRESULT hr;
 
 IMultiSourceFrameReader* multiSourceFrameReader = nullptr;
@@ -441,32 +439,47 @@ void loadJointsIntoHierarchy(Joint* joint, JointNode* root, unordered_map<JointT
 static void getJointData(Joint* bodyJoints, int reader) {
 	//get MultiFrame
 	hr = multiSourceFrameReader->AcquireLatestFrame(&multiSourceFrame);
-	//Sleep(1);
 	if (FAILED(hr)) {
 		if (E_PENDING == hr) {
 			cerr << "MultiSourceFrame Pending" << endl;
 		}
-		else if(E_FAIL == hr){
+		else if (E_FAIL == hr) {
 			cerr << "couldn't get MultiSourceFrame" << endl;
 		}
 		return;
 	}
-	
 
+	bool colorFrameAcquired = true;
 	//Acquire Body Frame
 	IBodyFrame* bodyFrame = nullptr;
 	IBodyFrameReference* bodyFrameReference = nullptr;
+	IColorFrame* colorFrame = nullptr;
+	IColorFrameReader* colorFrameReader = nullptr;
+	IColorFrameReference* colorFrameReference = nullptr;
+
 	hr = multiSourceFrame->get_BodyFrameReference(&bodyFrameReference);
 	if (FAILED(hr)) {
 		cerr << "couldn't get BodyFrameReference" << endl;
+		return;
 	}
-	else if (SUCCEEDED(hr)) {
-		hr = bodyFrameReference->AcquireFrame(&bodyFrame);
-		if (FAILED(hr)) {
-			cerr << "couldn't get BodyFrame" << endl;
-		}
-		safeRelease(bodyFrameReference);
+	hr = multiSourceFrame->get_ColorFrameReference(&colorFrameReference);
+	//get color frame source
+	if (FAILED(hr)) {
+		cerr << "couldn't get ColorFrameReference" << endl;
+		colorFrameAcquired = false;
 	}
+	safeRelease(multiSourceFrame);
+
+	if (colorFrameAcquired){
+		hr = colorFrameReference->AcquireFrame(&colorFrame);
+	}
+	safeRelease(colorFrameReference);
+	hr = bodyFrameReference->AcquireFrame(&bodyFrame);
+	if (FAILED(hr)) {
+		cerr << "couldn't get BodyFrame" << endl;
+		return;
+	}
+	safeRelease(bodyFrameReference);
 
 	//use Body Frame
 	if (SUCCEEDED(hr)) {
@@ -542,76 +555,57 @@ static void getJointData(Joint* bodyJoints, int reader) {
 		std::cerr << "Trouble reading the body frame.\n";
 	}
 
-
-	//get color frame source
-	hr = multiSourceFrame->get_ColorFrameReference(&colorFrameReference);
-	if (FAILED(hr)) {
-		cerr << "couldn't get ColorFrameReference" << endl;
-	}
-	else if (SUCCEEDED(hr)){
-		return; //TODO: WHY?????????????????????????
-		hr = colorFrameReference->AcquireFrame(&colorFrame);
+	
+	if (colorFrameAcquired){
+		cout << "Got lastest color frame" << endl;
+		hr = colorFrame->CopyConvertedFrameDataToArray(640 * 480 * 4, textureData, ColorImageFormat_Bgra);
 		if (FAILED(hr)) {
-			if (hr == E_PENDING) {
-				cerr << "colorFrame is pending" << endl;
-			}
-			else if(hr == E_FAIL) {
-				cerr << "couldn't get colorFrame" << endl;
-			}
+			cerr << "Failed to copy frame data" << endl;
 		}
 		else {
-			safeRelease(colorFrameReference);
-			cout << "Got lastest color frame" << endl;
-			hr = colorFrame->CopyConvertedFrameDataToArray(640 * 480 * 4, textureData, ColorImageFormat_Bgra);
-			if (FAILED(hr)) {
-				cerr << "Failed to copy frame data" << endl;
-			}
-			else {
-				cout << "Copying frame data" << endl;
+			cout << "Copying frame data" << endl;
 
-				//// Initialize textures
-				glGenTextures(1, &textureId);
-				glBindTexture(GL_TEXTURE_2D, textureId);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 640, 480,
-					0, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)textureData);
-				glBindTexture(GL_TEXTURE_2D, 0);
+			//// Initialize textures
+			glGenTextures(1, &textureId);
+			glBindTexture(GL_TEXTURE_2D, textureId);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 640, 480,
+				0, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)textureData);
+			glBindTexture(GL_TEXTURE_2D, 0);
 
-				//// OpenGL setup
-				glClearColor(0, 0, 0, 0);
-				glClearDepth(1.0f);
-				glEnable(GL_TEXTURE_2D);
+			//// OpenGL setup
+			glClearColor(0, 0, 0, 0);
+			glClearDepth(1.0f);
+			glEnable(GL_TEXTURE_2D);
 
-				// Camera setup
-				glViewport(0, 0, 640, 480);
-				glMatrixMode(GL_PROJECTION);
-				glLoadIdentity();
-				glOrtho(0, 640, 480, 0, 1, -1);
-				glMatrixMode(GL_MODELVIEW);
-				glLoadIdentity();
+			// Camera setup
+			glViewport(0, 0, 640, 480);
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity();
+			glOrtho(0, 640, 480, 0, 1, -1);
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity();
 
-				//draw frames
-				glBindTexture(GL_TEXTURE_2D, textureId);
-				glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 640, 480, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)textureData);
+			//draw frames
+			glBindTexture(GL_TEXTURE_2D, textureId);
+			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 640, 480, GL_BGRA, GL_UNSIGNED_BYTE, (GLvoid*)textureData);
 
-				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-				glBegin(GL_QUADS);
-				glTexCoord2f(0.0f, 0.0f);
-				glVertex3f(0, 0, 0);
-				glTexCoord2f(1.0f, 0.0f);
-				glVertex3f(640, 0, 0);
-				glTexCoord2f(1.0f, 1.0f);
-				glVertex3f(640, 480, 0.0f);
-				glTexCoord2f(0.0f, 1.0f);
-				glVertex3f(0, 480, 0.0f);
-				glEnd();
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glBegin(GL_QUADS);
+			glTexCoord2f(0.0f, 0.0f);
+			glVertex3f(0, 0, 0);
+			glTexCoord2f(1.0f, 0.0f);
+			glVertex3f(640, 0, 0);
+			glTexCoord2f(1.0f, 1.0f);
+			glVertex3f(640, 480, 0.0f);
+			glTexCoord2f(0.0f, 1.0f);
+			glVertex3f(0, 480, 0.0f);
+			glEnd();
 
-				glDrawPixels(640, 480, GL_RGB, GL_UNSIGNED_BYTE, textureData);
-			}
+			glDrawPixels(640, 480, GL_RGB, GL_UNSIGNED_BYTE, textureData);
 		}
 	}
-	safeRelease(multiSourceFrame);
 }
 
 glm::vec3 getColor(glm::vec3 sNorm, glm::vec3 tNorm) {
