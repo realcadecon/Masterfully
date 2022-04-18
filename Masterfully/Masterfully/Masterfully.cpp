@@ -299,6 +299,7 @@ static void init()
 	prog->addUniform("P");
 	prog->addUniform("MV");
 	prog->addUniform("col");
+	prog->addUniform("alpha");
 	prog->addAttribute("aPos");
 	prog->addAttribute("aNor");
 	prog->setVerbose(false);
@@ -587,6 +588,75 @@ void computeTeacherData() {
 	}
 }
 
+string getJointName(JointType joint) {
+	switch (joint) {
+		case 0: 
+			return "Spine Base";
+		case 1:
+			return "Spine Mid";
+		case 2:
+			return "Neck";
+		case 3:
+			return "Head";
+		case 4:
+			return "Left Shoulder";
+		case 5:
+			return "Left Elbow";
+		case 6:
+			return "Left Wrist";
+		case 7:
+			return "Left Hand";
+		case 8:
+			return "Right Shoulder";
+		case 9:
+			return "Right Elbow";
+		case 10:
+			return "Right Wrist";
+		case 11:
+			return "Right Hand";
+		case 12:
+			return "Left Hip";
+		case 13:
+			return "Left Knee";
+		case 14:
+			return "Left Ankle";
+		case 15:
+			return "Left Foot";
+		case 16:
+			return "Right Hip";
+		case 17:
+			return "Right Knee";
+		case 18:
+			return "Right Ankle";
+		case 19:
+			return "Right Foot";
+		case 20:
+			return "Spine Shoulder";
+		case 21:
+			return "Tip of Left Hand";
+		case 22:
+			return "Left Thumb";
+		case 23:
+			return "Tip of Right Hand";
+		case 24:
+			return "Right Thumb";
+	}
+}
+
+glm::vec3 getGradeCol(float grade) {
+	float col_grad = min(1.f, (grade - 70.f) / 25.f);
+	glm::vec3 grade_col(1.f, 0.f, 0.f);
+	float val = col_grad * 2.f;
+	if (val > 1.f) {
+		grade_col.g = 1.f;
+		grade_col.r -= (val - 1.f);
+	}
+	else {
+		grade_col.g += val;
+	}
+	return grade_col;
+}
+
 static void render()
 {
 	// Get Joint data from Kinect
@@ -607,7 +677,7 @@ static void render()
 	// Grade variable
 	float grade_sum = 0;
 	float grade_min = 1.f;
-	JointType grade_min_type;
+	JointType grade_min_type = JointType_SpineBase;
 
 	// Get current frame buffer size.
 	int width = 0, height = 0;
@@ -634,7 +704,6 @@ static void render()
 	stack<JointNode*> s;
 	stack<JointNode*> s_t;
 	// FOR TESTING:
-	Text::renderText(FTprog, "test", 0, 0, 1, glm::vec3(1, 0, 0), VAO, VBO, characters, window);
     
 	if(true) {
 	//if (bodyJoints != nullptr) {
@@ -667,6 +736,7 @@ static void render()
 				MV->scale(.15, .15, .15);
 				glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
 				glUniform3f(prog->getUniform("col"), 200.f, 200.f, 200.f);
+				glUniform1f(prog->getUniform("alpha"), 1.f);
 				sphere->draw(prog);
 			MV->popMatrix();
 			prog->unbind();
@@ -681,11 +751,16 @@ static void render()
 				s_t.push(x_t->node);
 				x->node->color = getColor(x->norm, x_t->norm);
 				float tmp_grade = getGrade(x->norm, x_t->norm);
+				
 				grade_sum += tmp_grade;
 				if (tmp_grade < grade_min) {
-					grade_min = tmp_grade;
-					grade_min_type = x->node->type;
+					if (!(x->node->type == JointType_ThumbLeft || x->node->type == JointType_ThumbRight)) {
+						grade_min = tmp_grade;
+						grade_min_type = x->node->type;
+						cout << "tmp_grade: " << tmp_grade << " type: " << grade_min_type << "\n";
+					}
 				}
+				
 				MV->pushMatrix();
 					MV->translate(cur->pos);
 					MV->rotate(glm::acos(glm::dot(glm::vec3(0, 1, 0), x->norm)), glm::cross(glm::vec3(0, 1, 0), x->norm));
@@ -709,17 +784,40 @@ static void render()
 					MV->scale(glm::vec3(0.08, x_t->length, 0.08));
 					glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
 					glUniform3f(prog->getUniform("col"), 200.f, 200.f, 200.f);
+					glUniform1f(prog->getUniform("alpha"), 1.f);
 					shape->draw(prog);
 				MV->popMatrix();
 				prog->unbind();
 			}
 		}
+		prog->bind();
+		MV->pushMatrix();
+		MV->translate(studentJointMap[grade_min_type]->pos);
+		MV->scale(0.4f);
+		glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
+		glUniform3f(prog->getUniform("col"), 200.f, 0.f, 0.f);
+		glUniform1f(prog->getUniform("alpha"), 0.5f);
+		sphere->draw(prog);
+		MV->popMatrix();
+		prog->unbind();
 	}
 	// Render the Grade
-	string grade_out = std::to_string(100.0*grade_sum/25.0);
-	Text::renderText(FTprog, grade_out, 0 + 5, height - FONT_HEIGHT - 5, 1, glm::vec3(0, 0, 0), VAO, VBO, characters, window);
+	float grade = 100.0 * grade_sum / 25.0;
+	string grade_out = to_string(grade);
+	grade_out = grade_out.substr(0, 4) + "%";
+	
+	glm::vec3 grade_col = getGradeCol(grade);
+	
+	Text::renderText(FTprog, grade_out, 0 + 5, height - FONT_HEIGHT - 5, 1, grade_col, VAO, VBO, characters, window);
+	// Render advice
+	glm::vec3 min_grade_col = getGradeCol(grade_min);
+	Text::renderText(FTprog, "Work on your:", width - 125, height/2 + 0.3*FONT_HEIGHT, 0.3, glm::vec3(0, 0, 0), VAO, VBO, characters, window);
+	Text::renderText(FTprog, getJointName(grade_min_type), width - 125, height / 2 , 0.3, glm::vec3(0, 0, 0), VAO, VBO, characters, window);
+	Text::renderText(FTprog, string(to_string(100.f*grade_min).substr(0, 4) + "% Accurate"), width - 125, height / 2 - 0.3*FONT_HEIGHT, 0.3, min_grade_col, VAO, VBO, characters, window);
+	
 	MV->popMatrix();
 	prog->unbind();
+	
 
 	// Pop matrix stacks.
 	MV->popMatrix();

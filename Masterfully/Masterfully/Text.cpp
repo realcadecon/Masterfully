@@ -55,7 +55,7 @@ namespace Text {
     void renderText(std::shared_ptr<Program> s, std::string text, float x, float y, float scale, glm::vec3 color, unsigned int &VAO, unsigned int &VBO, std::map<char, Character> &characters, GLFWwindow* window) {
         s->bind();
         
-        glUniform3f(s->getUniform("textColor"), 1.f, 0.f, 0.f);
+        glUniform3f(s->getUniform("textColor"), color.r, color.g, color.b);
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
         glm::mat4 projection = glm::ortho(0.0f, (float)width, 0.0f, (float)height);
