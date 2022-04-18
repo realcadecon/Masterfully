@@ -801,6 +801,10 @@ static void render()
 		MV->popMatrix();
 		prog->unbind();
 	}
+	//Render title
+	Text::renderText(FTprog, "Warrior II Pose", 200, height - FONT_HEIGHT - 5, 1, glm::vec3(0, 0, 0), VAO, VBO, characters, window);
+
+
 	// Render the Grade
 	float grade = 100.0 * grade_sum / 25.0;
 	string grade_out = to_string(grade);
