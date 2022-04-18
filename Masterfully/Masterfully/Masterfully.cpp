@@ -562,8 +562,8 @@ glm::vec3 getColor(glm::vec3 sNorm, glm::vec3 tNorm) {
 }
 
 float getGrade(glm::vec3 sNorm, glm::vec3 tNorm) {
-	float ang = glm::acos(glm::dot(sNorm, tNorm));
-	float val = max(1.0 - (ang / (M_PI / 2)), 0.0);
+	float ang = abs(glm::acos(glm::dot(sNorm, tNorm)));
+	float val = max(1.0 - (ang / (M_PI)), 0.0);
 	
 	return val;
 }
