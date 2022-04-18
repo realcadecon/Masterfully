@@ -33,6 +33,7 @@
 #include <ft2build.h>
 #include <freetype/freetype.h>
 #include "Text.h"
+#include "Texture.h"
 
 using namespace std;
 
@@ -52,6 +53,8 @@ unordered_map<JointType, JointNode*> teacherJointMap;
 const int FRAMERATE = 30;
 GLuint textureId;			 // ID of the texture to contain Kinect RGB Data
 GLubyte textureData[640 * 480 * 4]; // BGRA array containing the texture data
+int indCountQ = 0;
+map<string, GLuint> qBufIDs;
 
 IKinectSensor* sensor = nullptr;
 IBodyFrameReader* bodyFrameReader = nullptr;
@@ -61,6 +64,18 @@ HRESULT hr;
 const int FONT_HEIGHT = 48;
 std::map<char, Character> characters;
 unsigned int VAO, VBO;
+
+struct Pose {
+	string name, src;
+
+	Pose(string _name, string _src) {
+		name = _name;
+		src = _src;
+	}
+};
+
+vector<Pose> poses;
+int currPose = 5;
 
 #define MAX_LOADSTRING 100
 
@@ -367,7 +382,84 @@ static void init()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	loadTeacherNorms("./resources/warrior2.txt");
+	//loadTeacherNorms("./resources/warrior2.txt");
+	loadTeacherNorms(poses[currPose].src);
+
+	//texture quad
+	vector<float> posBufQ;
+	vector<float> norBufQ;
+	vector<float> texBufQ;
+	vector<unsigned int> indBufQ;
+
+	posBufQ.push_back(-1);
+	posBufQ.push_back(-1);
+	posBufQ.push_back(0);
+	norBufQ.push_back(0);
+	norBufQ.push_back(0);
+	norBufQ.push_back(1);
+
+	texBufQ.push_back(0);
+	texBufQ.push_back(0);
+
+	posBufQ.push_back(1);
+	posBufQ.push_back(-1);
+	posBufQ.push_back(0);
+	norBufQ.push_back(0);
+	norBufQ.push_back(0);
+	norBufQ.push_back(1);
+
+	texBufQ.push_back(1);
+	texBufQ.push_back(0);
+
+	posBufQ.push_back(1);
+	posBufQ.push_back(1);
+	posBufQ.push_back(0);
+	norBufQ.push_back(0);
+	norBufQ.push_back(0);
+	norBufQ.push_back(1);
+
+	texBufQ.push_back(1);
+	texBufQ.push_back(1);
+
+	posBufQ.push_back(-1);
+	posBufQ.push_back(1);
+	posBufQ.push_back(0);
+	norBufQ.push_back(0);
+	norBufQ.push_back(0);
+	norBufQ.push_back(1);
+
+	texBufQ.push_back(0);
+	texBufQ.push_back(1);
+
+	indBufQ.push_back(0);
+	indBufQ.push_back(1);
+	indBufQ.push_back(2);
+
+	indBufQ.push_back(0);
+	indBufQ.push_back(2);
+	indBufQ.push_back(3);
+
+	indCountQ = (int)indBufQ.size();
+
+	GLuint tmpQ[4];
+	glGenBuffers(4, tmpQ);
+	qBufIDs["bPos"] = tmpQ[0];
+	qBufIDs["bNor"] = tmpQ[1];
+	qBufIDs["bTex"] = tmpQ[2];
+	qBufIDs["bInd"] = tmpQ[3];
+	glBindBuffer(GL_ARRAY_BUFFER, qBufIDs["bPos"]);
+	glBufferData(GL_ARRAY_BUFFER, posBufQ.size() * sizeof(float), &posBufQ[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, qBufIDs["bNor"]);
+	glBufferData(GL_ARRAY_BUFFER, norBufQ.size() * sizeof(float), &norBufQ[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, qBufIDs["bTex"]);
+	glBufferData(GL_ARRAY_BUFFER, texBufQ.size() * sizeof(float), &texBufQ[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, qBufIDs["bInd"]);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indBufQ.size() * sizeof(unsigned int), &indBufQ[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	assert(norBufQ.size() == posBufQ.size());
+
 
 	// If there were any OpenGL errors, this will print something.
 	// You can intersperse this line in your code to find the exact location
@@ -669,7 +761,7 @@ static void render()
 	}
 	else {
 		// FOR TESTING
-		TEST_loadStudentData("./resources/test.txt");
+		//TEST_loadStudentData("./resources/test.txt");
 		computeTeacherData();
 		cerr << "No Body Detected\n";
 	}
@@ -802,7 +894,7 @@ static void render()
 		prog->unbind();
 	}
 	//Render title
-	Text::renderText(FTprog, "Warrior II Pose", 200, height - FONT_HEIGHT - 5, 1, glm::vec3(0, 0, 0), VAO, VBO, characters, window);
+	Text::renderText(FTprog, poses[currPose].name, 200, height - FONT_HEIGHT - 5, 1, glm::vec3(0, 0, 0), VAO, VBO, characters, window);
 
 
 	// Render the Grade
@@ -832,6 +924,26 @@ static void render()
 
 int test()
 {
+	//load poses
+	Pose war1("Warrior I", "./resources/warrior1.txt");
+	poses.push_back(war1);
+	Pose war2("Warrior II", "./resources/warrior2.txt");
+	poses.push_back(war2);
+	Pose tri("Extended Triangle", "./resources/tri.txt");
+	poses.push_back(tri);
+	Pose lotus("Lotus Pose", "./resources/lotus.txt");
+	poses.push_back(lotus);
+	Pose upDog("Upward-Facing Dog", "./resources/upwardDog.txt");
+	poses.push_back(upDog);	
+	Pose lordDance("Lord of the Dance", "./resources/lordOfDance.txt");
+	poses.push_back(lordDance);
+	Pose sideStretch("Intense Side Stretch", "./resources/sideStretch.txt");
+	poses.push_back(sideStretch);	
+	Pose downDog("Downward Facing Dog", "./resources/downDog.txt");
+	poses.push_back(downDog);
+	currPose = 7;
+	//Pose war1("war1", "./resources/warrior1.txt");
+	//Pose war1("war1", "./resources/warrior1.txt");
 
 	// Set error callback.
 	glfwSetErrorCallback(error_callback);
@@ -840,7 +952,7 @@ int test()
 		return -1;
 	}
 	// Create a windowed mode window and its OpenGL context.
-	window = glfwCreateWindow(640, 480, "Animation", NULL, NULL);
+	window = glfwCreateWindow(800, 480, "Animation", NULL, NULL);
 	if (!window) {
 		glfwTerminate();
 		return -1;

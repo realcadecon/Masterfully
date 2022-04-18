@@ -165,8 +165,11 @@
     <ClInclude Include="Program.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Shape.h" />
+    <ClInclude Include="stb_image.h" />
+    <ClInclude Include="stb_image_write.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Text.h" />
+    <ClInclude Include="Texture.h" />
     <ClInclude Include="tiny_obj_loader.h" />
   </ItemGroup>
   <ItemGroup>
@@ -177,6 +180,7 @@
     <ClCompile Include="Program.cpp" />
     <ClCompile Include="Shape.cpp" />
     <ClCompile Include="Text.cpp" />
+    <ClCompile Include="Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Masterfully.rc" />

@@ -54,6 +54,15 @@
     <ClInclude Include="Text.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image_write.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Masterfully.cpp">
@@ -75,6 +84,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Text.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
