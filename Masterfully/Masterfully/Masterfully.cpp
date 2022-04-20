@@ -930,7 +930,7 @@ static void render()
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, qBufIDs["bInd"]);
 		
 		MV->pushMatrix();
-			//MV->translate(0, 0, 0);
+			//MV->translate(0, 0, -1);
 			//MV->scale(100, 100, 1);
 			glUniformMatrix4fv(TEXprog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
 			glDrawElements(GL_TRIANGLES, indCountQ, GL_UNSIGNED_INT, (void*)0);
@@ -997,8 +997,7 @@ int test()
 	Pose downDog("Downward Facing Dog", "./resources/downDog.txt", "./resources/downDog.JPG");
 	poses.push_back(downDog);
 	currPose = 0;
-	//Pose war1("war1", "./resources/warrior1.txt");
-	//Pose war1("war1", "./resources/warrior1.txt");
+
 
 	// Set error callback.
 	glfwSetErrorCallback(error_callback);

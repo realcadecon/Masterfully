@@ -8,7 +8,7 @@ varying vec3 normal;
 void main()
 {
 	vec3 n = normalize(normal);
-	gl_FragColor.rgb = texture2D(texture0, vTex).rgb + vec3(1, 0, 0);
+	gl_FragColor.rgb = texture2D(texture0, vTex).rgb - texture2D(texture0, vTex).rgb + vec3(1,0,0);
 	
 	
 }
