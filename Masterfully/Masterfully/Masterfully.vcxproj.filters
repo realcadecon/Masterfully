@@ -123,5 +123,11 @@
     <None Include="resources\simple_vert.glsl">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="resources\texture_frag.glsl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="resources\texture_vert.glsl">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -4,8 +4,15 @@ uniform mat4 P;
 uniform mat4 MV;
 
 attribute vec4 aPos; // in object space
+attribute vec3 aNor;
+attribute vec2 aTex;
+
+varying vec3 normal;
+varying vec2 vTex;
 
 void main()
 {
 	gl_Position = P * MV * aPos;
+	normal = aNor;
+	vTex = aTex;
 }

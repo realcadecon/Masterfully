@@ -1,9 +1,0 @@
-#version 120
-
-uniform sampler2D texture;
-
-void main()
-{
-	gl_FragColor.rgb = texture2D(texture, vTex).rgb;
-
-}

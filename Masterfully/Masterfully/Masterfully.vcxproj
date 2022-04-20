@@ -197,6 +197,8 @@
     <None Include="resources\FT_vert.glsl" />
     <None Include="resources\simple_frag.glsl" />
     <None Include="resources\simple_vert.glsl" />
+    <None Include="resources\texture_frag.glsl" />
+    <None Include="resources\texture_vert.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
