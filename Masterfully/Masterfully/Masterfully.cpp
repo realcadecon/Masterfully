@@ -1006,8 +1006,7 @@ int test()
 	Pose downDog("Downward Facing Dog", "./resources/downDog.txt", "./resources/downDog.JPG");
 	poses.push_back(downDog);
 	currPose = 0;
-	//Pose war1("war1", "./resources/warrior1.txt");
-	//Pose war1("war1", "./resources/warrior1.txt");
+
 
 	// Set error callback.
 	glfwSetErrorCallback(error_callback);
