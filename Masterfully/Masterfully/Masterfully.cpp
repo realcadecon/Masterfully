@@ -46,6 +46,7 @@ shared_ptr<Program> FTprog;
 shared_ptr<Program> TEXprog;
 shared_ptr<Shape> shape;
 shared_ptr<Shape> sphere;
+shared_ptr<Shape> quad;
 JointNode* studentRoot;
 JointNode* teacherRoot;
 unordered_map<JointType, JointNode*> studentJointMap;
@@ -53,7 +54,7 @@ unordered_map<JointType, JointNode*> teacherJointMap;
 
 const int FRAMERATE = 30;
 GLuint textureId;			 // ID of the texture to contain Kinect RGB Data
-GLubyte textureData[640 * 480 * 4]; // BGRA array containing the texture data
+GLubyte textureData[128*128 * 4]; // BGRA array containing the texture data
 int indCountQ = 0;
 map<string, GLuint> qBufIDs;
 shared_ptr<Texture> texture0;
@@ -308,6 +309,9 @@ static void init()
 	sphere->loadMesh(RES_DIR + "sphere.obj");
 	sphere->init();
 
+	quad = make_shared<Shape>();
+	quad->loadMesh(RES_DIR + "ground.obj");
+	quad->init();
 
 	// Initialize the GLSL program.
 	prog = make_shared<Program>();
@@ -402,12 +406,13 @@ static void init()
 
 	texture0 = make_shared<Texture>();
 	texture0->setFilename(poses[currPose].srcPic);
+	//texture0->setFilename("./resources/grass2.png");
 	texture0->init();
 	texture0->setUnit(0);
 	texture0->setWrapModes(GL_REPEAT, GL_REPEAT);
 
 	//texture quad
-	vector<float> posBufQ;
+	/*vector<float> posBufQ;
 	vector<float> norBufQ;
 	vector<float> texBufQ;
 	vector<unsigned int> indBufQ;
@@ -479,7 +484,7 @@ static void init()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	assert(norBufQ.size() == posBufQ.size());
+	assert(norBufQ.size() == posBufQ.size());*/
 
 
 	// If there were any OpenGL errors, this will print something.
@@ -913,36 +918,40 @@ static void render()
 		sphere->draw(prog);
 		MV->popMatrix();
 		prog->unbind();
-		
+		MV->popMatrix();
 		//textured Quad
 		TEXprog->bind();
-		//texture0->bind(TEXprog->getUniform("texture"));
+		texture0->bind(TEXprog->getUniform("texture0"));
+		P->popMatrix();
 		P->pushMatrix();
+		P->multMatrix(glm::perspective((float)(45.0 * M_PI / 180.0), aspect, 0.01f, 100.0f));
 		MV->pushMatrix();
 		glUniformMatrix4fv(TEXprog->getUniform("P"), 1, GL_FALSE, &P->topMatrix()[0][0]);
-		glEnableVertexAttribArray(TEXprog->getAttribute("aPos"));
+		/*glEnableVertexAttribArray(TEXprog->getAttribute("aPos"));
 		GLSL::checkError(GET_FILE_LINE);
 		glEnableVertexAttribArray(TEXprog->getAttribute("aTex"));
 		glBindBuffer(GL_ARRAY_BUFFER, qBufIDs["bPos"]);
 		glVertexAttribPointer(TEXprog->getAttribute("aPos"), 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 		glBindBuffer(GL_ARRAY_BUFFER, qBufIDs["bTex"]);
 		glVertexAttribPointer(TEXprog->getAttribute("aTex"), 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, qBufIDs["bInd"]);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, qBufIDs["bInd"]);*/
 		
 		MV->pushMatrix();
-			//MV->translate(0, 0, 0);
-			//MV->scale(100, 100, 1);
+			
+			MV->translate(-2, -2, -2);
+			MV->scale(5);
+			
 			glUniformMatrix4fv(TEXprog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
-			glDrawElements(GL_TRIANGLES, indCountQ, GL_UNSIGNED_INT, (void*)0);
+			//glDrawElements(GL_TRIANGLES, indCountQ, GL_UNSIGNED_INT, (void*)0);
+			quad->draw(TEXprog);
 		MV->popMatrix();
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		/*glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glDisableVertexAttribArray(TEXprog->getAttribute("aTex"));
-		glDisableVertexAttribArray(TEXprog->getAttribute("aPos"));
+		glDisableVertexAttribArray(TEXprog->getAttribute("aPos"));*/
 
 		MV->popMatrix();
-		P->popMatrix();
 
 		TEXprog->unbind();
 
@@ -966,7 +975,7 @@ static void render()
 	Text::renderText(FTprog, getJointName(grade_min_type), width - 125, height / 2 , 0.3, glm::vec3(0, 0, 0), VAO, VBO, characters, window);
 	Text::renderText(FTprog, string(to_string(100.f*grade_min).substr(0, 4) + "% Accurate"), width - 125, height / 2 - 0.3*FONT_HEIGHT, 0.3, min_grade_col, VAO, VBO, characters, window);
 	
-	MV->popMatrix();
+	//MV->popMatrix();
 	prog->unbind();
 	
 
