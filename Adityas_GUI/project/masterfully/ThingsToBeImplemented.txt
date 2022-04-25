@@ -1,0 +1,9 @@
+1. Connect to Backend
+2. Make rectangles on 'Home' into buttons that run the movement
+3. Make lower row of 'Home' a carousel of buttons
+4. Make 'Search Bar' work
+5. Figure out what will be on settings
+   5a. implement what will be on settings
+6. Create functionality to create and download movements from the discover tab
+   6a. Flesh out 'Discover' tab
+7. Find better images to use for icons
