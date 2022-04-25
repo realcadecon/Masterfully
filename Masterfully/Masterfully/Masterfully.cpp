@@ -35,6 +35,8 @@
 #include "Text.h"
 #include "Texture.h"
 
+#include <pqxx/pqxx>
+
 using namespace std;
 
 GLFWwindow* window; // Main application window
@@ -988,24 +990,51 @@ static void render()
 
 int test()
 {
+	try {
+		pqxx::connection C("postgres://fwdufwcq:nSMG96HTO2RxWz2E-Iu-WNwkfoFMKnKW@heffalump.db.elephantsql.com/fwdufwcq");
+		if (C.is_open()) {
+			const char* sql;
+			cout << "Opened database succesfully: " << C.dbname() << endl;
+			sql = "SELECT COUNT (*) from poses";
+			pqxx::nontransaction N(C);
+			pqxx::result R(N.exec(sql));
+			N.commit();
+			int numPoses = stoi(R[0][0].c_str());
+			for (int i = 0; i < numPoses; i++) {
+				pqxx::nontransaction N2(C);
+				string angles;
+				string query = "SELECT name, angles, image from poses WHERE id = " + to_string(i);
+				sql = query.c_str();
+				pqxx::result R(N2.exec(sql));
+				N2.commit();
+				Pose temp(R[0][0].c_str(), R[0][1].c_str(), R[0][2].c_str());
+				poses.push_back(temp);
+			}
+			currPose = 2;
+		}
+	}
+	catch(const exception& e){
+		cerr << e.what() << endl;
+		return 1;
+	}
 	//load poses
-	Pose war1("Warrior I", "./resources/warrior1.txt", "./resources/war1.JPG");
-	poses.push_back(war1);
-	Pose war2("Warrior II", "./resources/warrior2.txt", "./resources/war2.JPG");
-	poses.push_back(war2);
-	Pose tri("Extended Triangle", "./resources/tri.txt", "./resources/warrior1.txt"); //still needs picture
-	poses.push_back(tri);
-	Pose lotus("Lotus Pose", "./resources/lotus.txt", "./resources/lotus.JPG");
-	poses.push_back(lotus);
-	Pose upDog("Upward-Facing Dog", "./resources/upwardDog.txt", "./resources/upDog.JPG");
-	poses.push_back(upDog);	
-	Pose lordDance("Lord of the Dance", "./resources/lordOfDance.txt", "./resources/lordDance.JPG");
-	poses.push_back(lordDance);
-	Pose sideStretch("Intense Side Stretch", "./resources/sideStretch.txt", "./resources/sideStretch.JPG");
-	poses.push_back(sideStretch);	
-	Pose downDog("Downward Facing Dog", "./resources/downDog.txt", "./resources/downDog.JPG");
-	poses.push_back(downDog);
-	currPose = 0;
+	//Pose war1("Warrior I", "./resources/warrior1.txt", "./resources/war1.JPG");
+	//poses.push_back(war1);
+	//Pose war2("Warrior II", "./resources/warrior2.txt", "./resources/war2.JPG");
+	//poses.push_back(war2);
+	//Pose tri("Extended Triangle", "./resources/tri.txt", "./resources/tri.JPG"); //still needs picture
+	//poses.push_back(tri);
+	//Pose lotus("Lotus Pose", "./resources/lotus.txt", "./resources/lotus.JPG");
+	//poses.push_back(lotus);
+	//Pose upDog("Upward-Facing Dog", "./resources/upwardDog.txt", "./resources/upDog.JPG");
+	//poses.push_back(upDog);	
+	//Pose lordDance("Lord of the Dance", "./resources/lordOfDance.txt", "./resources/lordDance.JPG");
+	//poses.push_back(lordDance);
+	//Pose sideStretch("Intense Side Stretch", "./resources/sideStretch.txt", "./resources/sideStretch.JPG");
+	//poses.push_back(sideStretch);	
+	//Pose downDog("Downward Facing Dog", "./resources/downDog.txt", "./resources/downDog.JPG");
+	//poses.push_back(downDog);
+	//currPose = 0;
 
 
 	// Set error callback.
