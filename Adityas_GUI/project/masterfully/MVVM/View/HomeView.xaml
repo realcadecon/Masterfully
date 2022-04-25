@@ -151,7 +151,8 @@
                             BorderBrush="Transparent"
                             Foreground="#1C658C"
                             FontSize="24"
-                            Content="Warrior I" ClickMode="Release">
+                            Content="Warrior I" ClickMode="Release"
+                            Click="Warrior1Click">
                         <Button.Resources>
                             <Style TargetType="{x:Type Border}">
                                 <Setter Property="CornerRadius" Value="10"/>

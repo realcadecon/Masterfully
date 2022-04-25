@@ -24,5 +24,11 @@ namespace Masterfully.MVVM.View
         {
             InitializeComponent();
         }
+
+        public void Warrior1Click(object sender, RoutedEventArgs e)
+        {
+            // Run Skeleton
+
+        }
     }
 }
