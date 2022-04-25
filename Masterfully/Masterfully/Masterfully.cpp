@@ -42,6 +42,7 @@ using namespace std;
 GLFWwindow* window; // Main application window
 GLFWwindow* kinectVideoOut; //RGB kinect video output
 string RES_DIR = "./resources/"; // Where data files live
+//string RES_DIR = "C:/Users/cadea/OneDrive/Documents/Masterfully/Masterfully/Masterfully/resources";
 shared_ptr<Program> prog;
 shared_ptr<Program> BPprog;
 shared_ptr<Program> FTprog;
@@ -412,82 +413,6 @@ static void init()
 	texture0->init();
 	texture0->setUnit(0);
 	texture0->setWrapModes(GL_REPEAT, GL_REPEAT);
-
-	//texture quad
-	/*vector<float> posBufQ;
-	vector<float> norBufQ;
-	vector<float> texBufQ;
-	vector<unsigned int> indBufQ;
-
-	posBufQ.push_back(-1);
-	posBufQ.push_back(-1);
-	posBufQ.push_back(0);
-	norBufQ.push_back(0);
-	norBufQ.push_back(0);
-	norBufQ.push_back(1);
-
-	texBufQ.push_back(0);
-	texBufQ.push_back(0);
-
-	posBufQ.push_back(1);
-	posBufQ.push_back(-1);
-	posBufQ.push_back(0);
-	norBufQ.push_back(0);
-	norBufQ.push_back(0);
-	norBufQ.push_back(1);
-
-	texBufQ.push_back(1);
-	texBufQ.push_back(0);
-
-	posBufQ.push_back(1);
-	posBufQ.push_back(1);
-	posBufQ.push_back(0);
-	norBufQ.push_back(0);
-	norBufQ.push_back(0);
-	norBufQ.push_back(1);
-
-	texBufQ.push_back(1);
-	texBufQ.push_back(1);
-
-	posBufQ.push_back(-1);
-	posBufQ.push_back(1);
-	posBufQ.push_back(0);
-	norBufQ.push_back(0);
-	norBufQ.push_back(0);
-	norBufQ.push_back(1);
-
-	texBufQ.push_back(0);
-	texBufQ.push_back(1);
-
-	indBufQ.push_back(0);
-	indBufQ.push_back(1);
-	indBufQ.push_back(2);
-
-	indBufQ.push_back(0);
-	indBufQ.push_back(2);
-	indBufQ.push_back(3);
-
-	indCountQ = (int)indBufQ.size();
-
-	GLuint tmpQ[4];
-	glGenBuffers(4, tmpQ);
-	qBufIDs["bPos"] = tmpQ[0];
-	qBufIDs["bNor"] = tmpQ[1];
-	qBufIDs["bTex"] = tmpQ[2];
-	qBufIDs["bInd"] = tmpQ[3];
-	glBindBuffer(GL_ARRAY_BUFFER, qBufIDs["bPos"]);
-	glBufferData(GL_ARRAY_BUFFER, posBufQ.size() * sizeof(float), &posBufQ[0], GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, qBufIDs["bNor"]);
-	glBufferData(GL_ARRAY_BUFFER, norBufQ.size() * sizeof(float), &norBufQ[0], GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, qBufIDs["bTex"]);
-	glBufferData(GL_ARRAY_BUFFER, texBufQ.size() * sizeof(float), &texBufQ[0], GL_STATIC_DRAW);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, qBufIDs["bInd"]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indBufQ.size() * sizeof(unsigned int), &indBufQ[0], GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	assert(norBufQ.size() == posBufQ.size());*/
-
 
 	// If there were any OpenGL errors, this will print something.
 	// You can intersperse this line in your code to find the exact location

@@ -88,6 +88,7 @@
     <LinkIncremental>true</LinkIncremental>
     <LibraryPath>$(ProjectDir)resources\x64\libs;$(VCInstallDir)lib\x64;$(VCInstallDir)atlmfc\lib\x64;$(LibraryPath)</LibraryPath>
     <IncludePath>$(ProjectDir)resources\includes;$(ProjectDir)resources\includes\freetype;$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)\Masterfully\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
