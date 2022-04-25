@@ -1125,7 +1125,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     test();
 
     // Initialize global strings
-    LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
+    /*LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_MASTERFULLY, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
 
@@ -1149,7 +1149,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
     }
 
-    return (int) msg.wParam;
+    return (int) msg.wParam;*/
 }
 
 
