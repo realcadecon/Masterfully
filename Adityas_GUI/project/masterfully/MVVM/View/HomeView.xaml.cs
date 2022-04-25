@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,7 +29,13 @@ namespace Masterfully.MVVM.View
         public void Warrior1Click(object sender, RoutedEventArgs e)
         {
             // Run Skeleton
-
+            Process process = new Process();
+            // Configure the process using the StartInfo properties.
+            process.StartInfo.FileName = "C:/Users/wbh19/Documents/Masterfully/Masterfully/x64/Debug/Masterfully.exe";
+            process.StartInfo.Arguments = "";
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            process.Start();
+            process.WaitForExit();// Waits here for the process to exit.
         }
     }
 }
