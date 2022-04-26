@@ -37,5 +37,137 @@ namespace Masterfully.MVVM.View
             process.Start();
             process.WaitForExit();// Waits here for the process to exit.
         }
+
+        public void Warrior2Click(object sender, RoutedEventArgs e)
+        {
+            // Run Skeleton
+            Process process = new Process();
+            // Configure the process using the StartInfo properties.
+            process.StartInfo.FileName = "C:/Users/wbh19/Documents/Masterfully/Masterfully/x64/Debug/Masterfully.exe";
+            process.StartInfo.Arguments = "";
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            process.Start();
+            process.WaitForExit();// Waits here for the process to exit.
+        }
+
+        public void LotusClick(object sender, RoutedEventArgs e)
+        {
+            // Run Skeleton
+            Process process = new Process();
+            // Configure the process using the StartInfo properties.
+            process.StartInfo.FileName = "C:/Users/wbh19/Documents/Masterfully/Masterfully/x64/Debug/Masterfully.exe";
+            process.StartInfo.Arguments = "";
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            process.Start();
+            process.WaitForExit();// Waits here for the process to exit.
+        }
+
+        public void TriClick(object sender, RoutedEventArgs e)
+        {
+            // Run Skeleton
+            Process process = new Process();
+            // Configure the process using the StartInfo properties.
+            process.StartInfo.FileName = "C:/Users/wbh19/Documents/Masterfully/Masterfully/x64/Debug/Masterfully.exe";
+            process.StartInfo.Arguments = "";
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            process.Start();
+            process.WaitForExit();// Waits here for the process to exit.
+        }
+
+        public void LoDClick(object sender, RoutedEventArgs e)
+        {
+            // Run Skeleton
+            Process process = new Process();
+            // Configure the process using the StartInfo properties.
+            process.StartInfo.FileName = "C:/Users/wbh19/Documents/Masterfully/Masterfully/x64/Debug/Masterfully.exe";
+            process.StartInfo.Arguments = "";
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            process.Start();
+            process.WaitForExit();// Waits here for the process to exit.
+        }
+
+        public void DowndogClick(object sender, RoutedEventArgs e)
+        {
+            // Run Skeleton
+            Process process = new Process();
+            // Configure the process using the StartInfo properties.
+            process.StartInfo.FileName = "C:/Users/wbh19/Documents/Masterfully/Masterfully/x64/Debug/Masterfully.exe";
+            process.StartInfo.Arguments = "";
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            process.Start();
+            process.WaitForExit();// Waits here for the process to exit.
+        }
+
+        public void UpdogClick(object sender, RoutedEventArgs e)
+        {
+            // Run Skeleton
+            Process process = new Process();
+            // Configure the process using the StartInfo properties.
+            process.StartInfo.FileName = "C:/Users/wbh19/Documents/Masterfully/Masterfully/x64/Debug/Masterfully.exe";
+            process.StartInfo.Arguments = "";
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            process.Start();
+            process.WaitForExit();// Waits here for the process to exit.
+        }
+
+        public void ChairClick(object sender, RoutedEventArgs e)
+        {
+            // Run Skeleton
+            Process process = new Process();
+            // Configure the process using the StartInfo properties.
+            process.StartInfo.FileName = "C:/Users/wbh19/Documents/Masterfully/Masterfully/x64/Debug/Masterfully.exe";
+            process.StartInfo.Arguments = "";
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            process.Start();
+            process.WaitForExit();// Waits here for the process to exit.
+        }
+
+        public void Warrior3Click(object sender, RoutedEventArgs e)
+        {
+            // Run Skeleton
+            Process process = new Process();
+            // Configure the process using the StartInfo properties.
+            process.StartInfo.FileName = "C:/Users/wbh19/Documents/Masterfully/Masterfully/x64/Debug/Masterfully.exe";
+            process.StartInfo.Arguments = "";
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            process.Start();
+            process.WaitForExit();// Waits here for the process to exit.
+        }
+
+        public void ThunderClick(object sender, RoutedEventArgs e)
+        {
+            // Run Skeleton
+            Process process = new Process();
+            // Configure the process using the StartInfo properties.
+            process.StartInfo.FileName = "C:/Users/wbh19/Documents/Masterfully/Masterfully/x64/Debug/Masterfully.exe";
+            process.StartInfo.Arguments = "";
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            process.Start();
+            process.WaitForExit();// Waits here for the process to exit.
+        }
+
+        public void PlankClick(object sender, RoutedEventArgs e)
+        {
+            // Run Skeleton
+            Process process = new Process();
+            // Configure the process using the StartInfo properties.
+            process.StartInfo.FileName = "C:/Users/wbh19/Documents/Masterfully/Masterfully/x64/Debug/Masterfully.exe";
+            process.StartInfo.Arguments = "";
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            process.Start();
+            process.WaitForExit();// Waits here for the process to exit.
+        }
+
+        private void SideClick(object sender, RoutedEventArgs e)
+        {
+            // Run Skeleton
+            Process process = new Process();
+            // Configure the process using the StartInfo properties.
+            process.StartInfo.FileName = "C:/Users/wbh19/Documents/Masterfully/Masterfully/x64/Debug/Masterfully.exe";
+            process.StartInfo.Arguments = "";
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            process.Start();
+            process.WaitForExit();// Waits here for the process to exit.
+        }
     }
 }

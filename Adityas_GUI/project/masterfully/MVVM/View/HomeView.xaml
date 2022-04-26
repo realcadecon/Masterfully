@@ -180,7 +180,8 @@
                             BorderBrush="Transparent"
                             Foreground="#1C658C"
                             FontSize="24"
-                            Content="Warrior II">
+                            Content="Warrior II" ClickMode="Release"
+                            Click="Warrior2Click">
                         <Button.Resources>
                             <Style TargetType="{x:Type Border}">
                                 <Setter Property="CornerRadius" Value="10"/>
@@ -208,7 +209,8 @@
                             BorderBrush="Transparent"
                             Foreground="#1C658C"
                             FontSize="24"
-                            Content="Lotus">
+                            Content="Lotus" ClickMode="Release"
+                            Click="LotusClick">
                         <Button.Resources>
                             <Style TargetType="{x:Type Border}">
                                 <Setter Property="CornerRadius" Value="10"/>
@@ -237,7 +239,8 @@
                             BorderBrush="Transparent"
                             Foreground="#1C658C"
                             FontSize="13"
-                            Content="Extended Triangle">
+                            Content="Extended Triangle" ClickMode="Release"
+                            Click="TriClick">
                         <Button.Resources>
                             <Style TargetType="{x:Type Border}">
                                 <Setter Property="CornerRadius" Value="10"/>
@@ -266,7 +269,8 @@
                             BorderBrush="Transparent"
                             Foreground="#1C658C"
                             FontSize="16"
-                            Content="Lord of Dance" Click="CarouselDance5_Click">
+                            Content="Lord of Dance" ClickMode="Release"
+                            Click="LoDClick">
 						<Button.Resources>
 							<Style TargetType="{x:Type Border}">
 								<Setter Property="CornerRadius" Value="10"/>
@@ -293,7 +297,8 @@
                             BorderBrush="Transparent"
                             Foreground="#1C658C"
                             FontSize="19"
-                            Content="Side Stretch">
+                            Content="Side Stretch" ClickMode="Release"
+                            Click="SideClick">
 						<Button.Resources>
 							<Style TargetType="{x:Type Border}">
 								<Setter Property="CornerRadius" Value="10"/>
@@ -335,7 +340,8 @@
                             BorderBrush="Transparent"
                             Foreground="#1C658C"
                             FontSize="14"
-                            Content="Downward Dog">
+                            Content="Downward Dog" ClickMode="Release"
+                            Click="DowndogClick">
                         <Button.Resources>
                             <Style TargetType="{x:Type Border}">
                                 <Setter Property="CornerRadius" Value="10"/>
@@ -364,7 +370,8 @@
                             BorderBrush="Transparent"
                             Foreground="#1C658C"
                             FontSize="17"
-                            Content="Upward Dog">
+                            Content="Upward Dog" ClickMode="Release"
+                            Click="UpdogClick">
                         <Button.Resources>
                             <Style TargetType="{x:Type Border}">
                                 <Setter Property="CornerRadius" Value="10"/>
@@ -393,7 +400,8 @@
                             BorderBrush="Transparent"
                             Foreground="#1C658C"
                             FontSize="26"
-                            Content="Chair">
+                            Content="Chair" ClickMode="Release"
+                            Click="ChairClick">
 						<Button.Resources>
 							<Style TargetType="{x:Type Border}">
 								<Setter Property="CornerRadius" Value="10"/>
@@ -422,7 +430,8 @@
                             BorderBrush="Transparent"
                             Foreground="#1C658C"
                             FontSize="23"
-                            Content="Warrior III">
+                            Content="Warrior III" ClickMode="Release"
+                            Click="Warrior3Click">
 						<Button.Resources>
 							<Style TargetType="{x:Type Border}">
 								<Setter Property="CornerRadius" Value="10"/>
@@ -451,7 +460,8 @@
                             BorderBrush="Transparent"
                             Foreground="#1C658C"
                             FontSize="18"
-                            Content="Thunderbolt">
+                            Content="Thunderbolt" ClickMode="Release"
+                            Click="ThunderClick">
 						<Button.Resources>
 							<Style TargetType="{x:Type Border}">
 								<Setter Property="CornerRadius" Value="10"/>
@@ -480,7 +490,8 @@
                             BorderBrush="Transparent"
                             Foreground="#1C658C"
                             FontSize="26"
-                            Content="Plank">
+                            Content="Plank" ClickMode="Release"
+                            Click="PlankClick">
 						<Button.Resources>
 							<Style TargetType="{x:Type Border}">
 								<Setter Property="CornerRadius" Value="10"/>
