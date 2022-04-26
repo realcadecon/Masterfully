@@ -33,8 +33,8 @@ namespace Masterfully.MVVM.View
             string path = Directory.GetCurrentDirectory();
             Process process = new Process();
             // Configure the process using the StartInfo properties.
-            process.StartInfo.FileName = path+"/Skeleton.exe";
-            process.StartInfo.Arguments = "Warrior1";
+            process.StartInfo.FileName = path + "/Skeleton.exe";
+            process.StartInfo.Arguments = "5";
             process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
             process.Start();
             process.WaitForExit();// Waits here for the process to exit.
@@ -47,7 +47,7 @@ namespace Masterfully.MVVM.View
             Process process = new Process();
             // Configure the process using the StartInfo properties.
             process.StartInfo.FileName = path + "/Skeleton.exe";
-            process.StartInfo.Arguments = "Warrior2";
+            process.StartInfo.Arguments = "1";
             process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
             process.Start();
             process.WaitForExit();// Waits here for the process to exit.
@@ -60,7 +60,7 @@ namespace Masterfully.MVVM.View
             Process process = new Process();
             // Configure the process using the StartInfo properties.
             process.StartInfo.FileName = path + "/Skeleton.exe";
-            process.StartInfo.Arguments = "Lotus";
+            process.StartInfo.Arguments = "0";
             process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
             process.Start();
             process.WaitForExit();// Waits here for the process to exit.
@@ -73,7 +73,7 @@ namespace Masterfully.MVVM.View
             Process process = new Process();
             // Configure the process using the StartInfo properties.
             process.StartInfo.FileName = path + "/Skeleton.exe";
-            process.StartInfo.Arguments = "ExtendedTriangle";
+            process.StartInfo.Arguments = "2";
             process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
             process.Start();
             process.WaitForExit();// Waits here for the process to exit.
@@ -86,7 +86,7 @@ namespace Masterfully.MVVM.View
             Process process = new Process();
             // Configure the process using the StartInfo properties.
             process.StartInfo.FileName = path + "/Skeleton.exe";
-            process.StartInfo.Arguments = "LordOfDance";
+            process.StartInfo.Arguments = "3";
             process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
             process.Start();
             process.WaitForExit();// Waits here for the process to exit.
@@ -99,7 +99,7 @@ namespace Masterfully.MVVM.View
             Process process = new Process();
             // Configure the process using the StartInfo properties.
             process.StartInfo.FileName = path + "/Skeleton.exe";
-            process.StartInfo.Arguments = "SideStretch";
+            process.StartInfo.Arguments = "4";
             process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
             process.Start();
             process.WaitForExit();// Waits here for the process to exit.
@@ -112,7 +112,7 @@ namespace Masterfully.MVVM.View
             Process process = new Process();
             // Configure the process using the StartInfo properties.
             process.StartInfo.FileName = path + "/Skeleton.exe";
-            process.StartInfo.Arguments = "DownwardDog";
+            process.StartInfo.Arguments = "6";
             process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
             process.Start();
             process.WaitForExit();// Waits here for the process to exit.
@@ -125,7 +125,7 @@ namespace Masterfully.MVVM.View
             Process process = new Process();
             // Configure the process using the StartInfo properties.
             process.StartInfo.FileName = path + "/Skeleton.exe";
-            process.StartInfo.Arguments = "UpwardDog";
+            process.StartInfo.Arguments = "7";
             process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
             process.Start();
             process.WaitForExit();// Waits here for the process to exit.

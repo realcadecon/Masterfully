@@ -36,6 +36,7 @@
 #include "Texture.h"
 
 #include <pqxx/pqxx>
+#include <shellapi.h>
 
 using namespace std;
 
@@ -913,7 +914,7 @@ static void render()
 	GLSL::checkError(GET_FILE_LINE);
 }
 
-int test()
+int test(int selectedPose)
 {
 	try {
 		pqxx::connection C("postgres://fwdufwcq:nSMG96HTO2RxWz2E-Iu-WNwkfoFMKnKW@heffalump.db.elephantsql.com/fwdufwcq");
@@ -935,7 +936,7 @@ int test()
 				Pose temp(R[0][0].c_str(), R[0][1].c_str(), R[0][2].c_str());
 				poses.push_back(temp);
 			}
-			currPose = 2;
+			currPose = selectedPose;
 		}
 	}
 	catch(const exception& e){
@@ -1036,6 +1037,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: Place code here.
+	int pose = 0;
+	int argc = -1;
+	LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+	if (argc >= 2) {
+		pose = stoi(argv[1]);
+	}
+	cout << pose << endl;
 
 	//Get the default Kinect sensor
 	hr = GetDefaultKinectSensor(&sensor);
@@ -1076,7 +1084,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	cout << "test" << endl;
 	cerr << "test" << endl;
 
-    test();
+	test(pose);
 
     // Initialize global strings
     //LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
