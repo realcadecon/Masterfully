@@ -34,7 +34,7 @@ namespace Masterfully.MVVM.View
             Process process = new Process();
             // Configure the process using the StartInfo properties.
             process.StartInfo.FileName = path + "/Skeleton.exe";
-            process.StartInfo.Arguments = "5";
+            process.StartInfo.Arguments = "-m 5";
             process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
             process.Start();
             process.WaitForExit();// Waits here for the process to exit.
@@ -47,7 +47,7 @@ namespace Masterfully.MVVM.View
             Process process = new Process();
             // Configure the process using the StartInfo properties.
             process.StartInfo.FileName = path + "/Skeleton.exe";
-            process.StartInfo.Arguments = "1";
+            process.StartInfo.Arguments = "-m 1";
             process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
             process.Start();
             process.WaitForExit();// Waits here for the process to exit.
@@ -60,7 +60,7 @@ namespace Masterfully.MVVM.View
             Process process = new Process();
             // Configure the process using the StartInfo properties.
             process.StartInfo.FileName = path + "/Skeleton.exe";
-            process.StartInfo.Arguments = "0";
+            process.StartInfo.Arguments = "-m 0";
             process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
             process.Start();
             process.WaitForExit();// Waits here for the process to exit.
@@ -73,7 +73,7 @@ namespace Masterfully.MVVM.View
             Process process = new Process();
             // Configure the process using the StartInfo properties.
             process.StartInfo.FileName = path + "/Skeleton.exe";
-            process.StartInfo.Arguments = "2";
+            process.StartInfo.Arguments = "-m 2";
             process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
             process.Start();
             process.WaitForExit();// Waits here for the process to exit.
@@ -86,7 +86,7 @@ namespace Masterfully.MVVM.View
             Process process = new Process();
             // Configure the process using the StartInfo properties.
             process.StartInfo.FileName = path + "/Skeleton.exe";
-            process.StartInfo.Arguments = "3";
+            process.StartInfo.Arguments = "-m 3";
             process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
             process.Start();
             process.WaitForExit();// Waits here for the process to exit.
@@ -99,7 +99,7 @@ namespace Masterfully.MVVM.View
             Process process = new Process();
             // Configure the process using the StartInfo properties.
             process.StartInfo.FileName = path + "/Skeleton.exe";
-            process.StartInfo.Arguments = "4";
+            process.StartInfo.Arguments = "-m 4";
             process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
             process.Start();
             process.WaitForExit();// Waits here for the process to exit.
@@ -112,7 +112,7 @@ namespace Masterfully.MVVM.View
             Process process = new Process();
             // Configure the process using the StartInfo properties.
             process.StartInfo.FileName = path + "/Skeleton.exe";
-            process.StartInfo.Arguments = "6";
+            process.StartInfo.Arguments = "-m 6";
             process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
             process.Start();
             process.WaitForExit();// Waits here for the process to exit.
@@ -125,7 +125,7 @@ namespace Masterfully.MVVM.View
             Process process = new Process();
             // Configure the process using the StartInfo properties.
             process.StartInfo.FileName = path + "/Skeleton.exe";
-            process.StartInfo.Arguments = "7";
+            process.StartInfo.Arguments = "-m 7";
             process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
             process.Start();
             process.WaitForExit();// Waits here for the process to exit.
