@@ -133,10 +133,9 @@
                    FontSize="20"
                    HorizontalAlignment="Left"
                    Margin="0,0,0,10"/>
-
             <StackPanel Orientation="Horizontal">
-                <Border Width="150"
-                        Height="150"
+                <Border Width="105"
+                        Height="105"
                         CornerRadius="10"
                         Margin="0">
                     <Border.Background>
@@ -166,8 +165,8 @@
                 </Border>
 
 
-                <Border Width="150"
-                        Height="150"
+                <Border Width="105"
+                        Height="105"
                         CornerRadius="10">
                     <Border.Background>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
@@ -181,7 +180,7 @@
                             BorderBrush="Transparent"
                             Foreground="#1C658C"
                             FontSize="24"
-                            Content="Warrior II"
+                            Content="Warrior II" ClickMode="Release"
                             Click="Warrior2Click">
                         <Button.Resources>
                             <Style TargetType="{x:Type Border}">
@@ -195,8 +194,8 @@
 
                 </Border>
 
-                <Border Width="150"
-                        Height="150"
+                <Border Width="105"
+                        Height="105"
                         CornerRadius="10">
                     <Border.Background>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
@@ -210,7 +209,7 @@
                             BorderBrush="Transparent"
                             Foreground="#1C658C"
                             FontSize="24"
-                            Content="Lotus"
+                            Content="Lotus" ClickMode="Release"
                             Click="LotusClick">
                         <Button.Resources>
                             <Style TargetType="{x:Type Border}">
@@ -224,8 +223,8 @@
 
                 </Border>
 
-                <Border Width="150"
-                        Height="150"
+                <Border Width="105"
+                        Height="105"
                         CornerRadius="10">
 
                     <Border.Background>
@@ -239,9 +238,9 @@
                             x:Name="CarouselDance4"
                             BorderBrush="Transparent"
                             Foreground="#1C658C"
-                            FontSize="18"
-                            Content="Extended Triangle"
-                            Click="ExtendedTriangleClick">
+                            FontSize="13"
+                            Content="Extended Triangle" ClickMode="Release"
+                            Click="TriClick">
                         <Button.Resources>
                             <Style TargetType="{x:Type Border}">
                                 <Setter Property="CornerRadius" Value="10"/>
@@ -252,6 +251,63 @@
                         </Button.Background>
                     </Button>
 
+                </Border>
+
+                <Border Width="105"
+                        Height="105"
+                        CornerRadius="10"
+                        Margin="15, 0, 0, 0">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#D8D2CB" Offset="0.0"/>
+                            <GradientStop Color="#EEEEEE" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+
+                    <Button Cursor="Hand"
+                            x:Name="CarouselDance5"
+                            BorderBrush="Transparent"
+                            Foreground="#1C658C"
+                            FontSize="16"
+                            Content="Lord of Dance" ClickMode="Release"
+                            Click="LoDClick">
+                        <Button.Resources>
+                            <Style TargetType="{x:Type Border}">
+                                <Setter Property="CornerRadius" Value="10"/>
+                            </Style>
+                        </Button.Resources>
+                        <Button.Background>
+                            <ImageBrush ImageSource="/MVVM/View/Lord of the dance.JPG"/>
+                        </Button.Background>
+                    </Button>
+                </Border>
+
+                <Border Width="105"
+                        Height="105"
+                        CornerRadius="10">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#D8D2CB" Offset="0.0"/>
+                            <GradientStop Color="#EEEEEE" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+
+                    <Button Cursor="Hand"
+                            x:Name="CarouselDance6"
+                            BorderBrush="Transparent"
+                            Foreground="#1C658C"
+                            FontSize="19"
+                            Content="Side Stretch" ClickMode="Release"
+                            Click="SideClick">
+                        <Button.Resources>
+                            <Style TargetType="{x:Type Border}">
+                                <Setter Property="CornerRadius" Value="10"/>
+                            </Style>
+                        </Button.Resources>
+                        <Button.Background>
+                            <ImageBrush ImageSource="/MVVM/View/intense side stretch.JPG"/>
+                        </Button.Background>
+                    </Button>
                 </Border>
 
             </StackPanel>
@@ -267,68 +323,11 @@
             </StackPanel.Resources>
 
             <StackPanel Orientation="Horizontal">
-                <Border Width="150"
-                        Height="150"
+
+                <Border Width="105"
+                        Height="105"
                         CornerRadius="10"
-                        Margin="0">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#D8D2CB" Offset="0.0"/>
-                            <GradientStop Color="#EEEEEE" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Border.Background>
-
-                    <Button Cursor="Hand"
-                            x:Name="CarouselDance5"
-                            BorderBrush="Transparent"
-                            Foreground="#1C658C"
-                            FontSize="22"
-                            Content="Lord of Dance"
-                            Click="LordOfDanceClick">
-                        <Button.Resources>
-                            <Style TargetType="{x:Type Border}">
-                                <Setter Property="CornerRadius" Value="10"/>
-                            </Style>
-                        </Button.Resources>
-                        <Button.Background>
-                            <ImageBrush ImageSource="/MVVM/View/Lord of the dance.JPG"/>
-                        </Button.Background>
-                    </Button>
-
-                </Border>
-
-                <Border Width="150"
-                        Height="150"
-                        CornerRadius="10">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#D8D2CB" Offset="0.0"/>
-                            <GradientStop Color="#EEEEEE" Offset="1"/>
-                        </LinearGradientBrush>
-                    </Border.Background>
-
-                    <Button Cursor="Hand"
-                            x:Name="CarouselDance6"
-                            BorderBrush="Transparent"
-                            Foreground="#1C658C"
-                            FontSize="24"
-                            Content="Side Stretch"
-                            Click="SideStretchClick">
-                        <Button.Resources>
-                            <Style TargetType="{x:Type Border}">
-                                <Setter Property="CornerRadius" Value="10"/>
-                            </Style>
-                        </Button.Resources>
-                        <Button.Background>
-                            <ImageBrush ImageSource="/MVVM/View/intense side stretch.JPG"/>
-                        </Button.Background>
-                    </Button>
-
-                </Border>
-
-                <Border Width="150"
-                        Height="150"
-                        CornerRadius="10">
+						Margin="0">
                     <Border.Background>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                             <GradientStop Color="#D8D2CB" Offset="0.0"/>
@@ -340,9 +339,9 @@
                             x:Name="CarouselDance7"
                             BorderBrush="Transparent"
                             Foreground="#1C658C"
-                            FontSize="20"
-                            Content="Downward Dog"
-                            Click="DownwardDogClick">
+                            FontSize="14"
+                            Content="Downward Dog" ClickMode="Release"
+                            Click="DowndogClick">
                         <Button.Resources>
                             <Style TargetType="{x:Type Border}">
                                 <Setter Property="CornerRadius" Value="10"/>
@@ -355,8 +354,8 @@
 
                 </Border>
 
-                <Border Width="150"
-                        Height="150"
+                <Border Width="105"
+                        Height="105"
                         CornerRadius="10">
 
                     <Border.Background>
@@ -370,9 +369,9 @@
                             x:Name="CarouselDance8"
                             BorderBrush="Transparent"
                             Foreground="#1C658C"
-                            FontSize="24"
-                            Content="Upward Dog"
-                            Click="UpwardDogClick">
+                            FontSize="17"
+                            Content="Upward Dog" ClickMode="Release"
+                            Click="UpdogClick">
                         <Button.Resources>
                             <Style TargetType="{x:Type Border}">
                                 <Setter Property="CornerRadius" Value="10"/>
@@ -385,6 +384,125 @@
 
                 </Border>
 
+                <Border Width="105"
+                        Height="105"
+                        CornerRadius="10">
+
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#D8D2CB" Offset="0.0"/>
+                            <GradientStop Color="#EEEEEE" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+
+                    <Button Cursor="Hand"
+                            x:Name="CarouselDance9"
+                            BorderBrush="Transparent"
+                            Foreground="#1C658C"
+                            FontSize="26"
+                            Content="Chair" ClickMode="Release"
+                            Click="ChairClick">
+                        <Button.Resources>
+                            <Style TargetType="{x:Type Border}">
+                                <Setter Property="CornerRadius" Value="10"/>
+                            </Style>
+                        </Button.Resources>
+                        <Button.Background>
+                            <ImageBrush ImageSource="/MVVM/View/Chair.JPG"/>
+                        </Button.Background>
+                    </Button>
+
+                </Border>
+
+                <Border Width="105"
+                        Height="105"
+                        CornerRadius="10">
+
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#D8D2CB" Offset="0.0"/>
+                            <GradientStop Color="#EEEEEE" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+
+                    <Button Cursor="Hand"
+                            x:Name="CarouselDance10"
+                            BorderBrush="Transparent"
+                            Foreground="#1C658C"
+                            FontSize="23"
+                            Content="Warrior III" ClickMode="Release"
+                            Click="Warrior3Click">
+                        <Button.Resources>
+                            <Style TargetType="{x:Type Border}">
+                                <Setter Property="CornerRadius" Value="10"/>
+                            </Style>
+                        </Button.Resources>
+                        <Button.Background>
+                            <ImageBrush ImageSource="/MVVM/View/war3.JPG"/>
+                        </Button.Background>
+                    </Button>
+
+                </Border>
+
+                <Border Width="105"
+                        Height="105"
+                        CornerRadius="10">
+
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#D8D2CB" Offset="0.0"/>
+                            <GradientStop Color="#EEEEEE" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+
+                    <Button Cursor="Hand"
+                            x:Name="CarouselDance11"
+                            BorderBrush="Transparent"
+                            Foreground="#1C658C"
+                            FontSize="18"
+                            Content="Thunderbolt" ClickMode="Release"
+                            Click="ThunderClick">
+                        <Button.Resources>
+                            <Style TargetType="{x:Type Border}">
+                                <Setter Property="CornerRadius" Value="10"/>
+                            </Style>
+                        </Button.Resources>
+                        <Button.Background>
+                            <ImageBrush ImageSource="/MVVM/View/thunder.JPG"/>
+                        </Button.Background>
+                    </Button>
+
+                </Border>
+
+                <Border Width="105"
+                        Height="105"
+                        CornerRadius="10">
+
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#D8D2CB" Offset="0.0"/>
+                            <GradientStop Color="#EEEEEE" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+
+                    <Button Cursor="Hand"
+                            x:Name="CarouselDance12"
+                            BorderBrush="Transparent"
+                            Foreground="#1C658C"
+                            FontSize="26"
+                            Content="Plank" ClickMode="Release"
+                            Click="PlankClick">
+                        <Button.Resources>
+                            <Style TargetType="{x:Type Border}">
+                                <Setter Property="CornerRadius" Value="10"/>
+                            </Style>
+                        </Button.Resources>
+                        <Button.Background>
+                            <ImageBrush ImageSource="/MVVM/View/plank.JPG"/>
+                        </Button.Background>
+                    </Button>
+
+                </Border>
             </StackPanel>
 
         </StackPanel>
