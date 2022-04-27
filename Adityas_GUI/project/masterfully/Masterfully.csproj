@@ -160,5 +160,17 @@
   <ItemGroup>
     <Resource Include="MVVM\View\upwardfacing_dog.JPG" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="MVVM\View\chair.JPG" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="MVVM\View\war3.JPG" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="MVVM\View\plank.JPG" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="MVVM\View\thunder.JPG" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
