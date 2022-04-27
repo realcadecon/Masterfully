@@ -66,7 +66,7 @@ namespace Masterfully.MVVM.View
             process.WaitForExit();// Waits here for the process to exit.
         }
 
-        public void ExtendedTriangleClick(object sender, RoutedEventArgs e)
+        public void TriClick(object sender, RoutedEventArgs e)
         {
             // Run Skeleton.
             string path = Directory.GetCurrentDirectory();
@@ -79,7 +79,7 @@ namespace Masterfully.MVVM.View
             process.WaitForExit();// Waits here for the process to exit.
         }
 
-        public void LordOfDanceClick(object sender, RoutedEventArgs e)
+        public void LoDClick(object sender, RoutedEventArgs e)
         {
             // Run Skeleton.
             string path = Directory.GetCurrentDirectory();
@@ -92,7 +92,7 @@ namespace Masterfully.MVVM.View
             process.WaitForExit();// Waits here for the process to exit.
         }
 
-        public void SideStretchClick(object sender, RoutedEventArgs e)
+        public void DowndogClick(object sender, RoutedEventArgs e)
         {
             // Run Skeleton.
             string path = Directory.GetCurrentDirectory();
@@ -105,7 +105,7 @@ namespace Masterfully.MVVM.View
             process.WaitForExit();// Waits here for the process to exit.
         }
 
-        public void DownwardDogClick(object sender, RoutedEventArgs e)
+        public void UpdogClick(object sender, RoutedEventArgs e)
         {
             // Run Skeleton.
             string path = Directory.GetCurrentDirectory();
@@ -118,7 +118,59 @@ namespace Masterfully.MVVM.View
             process.WaitForExit();// Waits here for the process to exit.
         }
 
-        public void UpwardDogClick(object sender, RoutedEventArgs e)
+        public void ChairClick(object sender, RoutedEventArgs e)
+        {
+            // Run Skeleton.
+            string path = Directory.GetCurrentDirectory();
+            Process process = new Process();
+            // Configure the process using the StartInfo properties.
+            process.StartInfo.FileName = path + "/Skeleton.exe";
+            process.StartInfo.Arguments = "-m 8";
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            process.Start();
+            process.WaitForExit();// Waits here for the process to exit.
+        }
+
+        public void Warrior3Click(object sender, RoutedEventArgs e)
+        {
+            // Run Skeleton.
+            string path = Directory.GetCurrentDirectory();
+            Process process = new Process();
+            // Configure the process using the StartInfo properties.
+            process.StartInfo.FileName = path + "/Skeleton.exe";
+            process.StartInfo.Arguments = "-m 9";
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            process.Start();
+            process.WaitForExit();// Waits here for the process to exit.
+        }
+
+        public void ThunderClick(object sender, RoutedEventArgs e)
+        {
+            // Run Skeleton.
+            string path = Directory.GetCurrentDirectory();
+            Process process = new Process();
+            // Configure the process using the StartInfo properties.
+            process.StartInfo.FileName = path + "/Skeleton.exe";
+            process.StartInfo.Arguments = "-m 10";
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            process.Start();
+            process.WaitForExit();// Waits here for the process to exit.
+        }
+
+        public void PlankClick(object sender, RoutedEventArgs e)
+        {
+            // Run Skeleton.
+            string path = Directory.GetCurrentDirectory();
+            Process process = new Process();
+            // Configure the process using the StartInfo properties.
+            process.StartInfo.FileName = path + "/Skeleton.exe";
+            process.StartInfo.Arguments = "-m 11";
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            process.Start();
+            process.WaitForExit();// Waits here for the process to exit.
+        }
+
+        private void SideClick(object sender, RoutedEventArgs e)
         {
             // Run Skeleton.
             string path = Directory.GetCurrentDirectory();
