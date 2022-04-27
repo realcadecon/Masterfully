@@ -12,6 +12,7 @@
 #include <fstream>
 #include <time.h>
 #include <unordered_map>
+#include <atlstr.h>
 
 
 #define GLEW_STATIC
@@ -72,6 +73,17 @@ const int FONT_HEIGHT = 48;
 std::map<char, Character> characters;
 unsigned int VAO, VBO;
 
+enum MatchState
+{
+	UNMATCHED,
+	MATCHING,
+	MATCHED
+};
+
+string objective = "match";
+MatchState curState = UNMATCHED;
+double countdown_start = -1.f;
+
 struct Pose {
 	string name, src, srcPic;
 
@@ -84,6 +96,7 @@ struct Pose {
 
 vector<Pose> poses;
 int currPose = 5;
+string newPoseName = "";
 
 #define MAX_LOADSTRING 100
 
@@ -394,7 +407,8 @@ static void init()
 	glBindVertexArray(0);
 
 	//loadTeacherNorms("./resources/warrior2.txt");
-	loadTeacherNorms(poses[currPose].src);
+	if(objective == "match")
+		loadTeacherNorms(poses[currPose].src);
 
 	//texture Shader
 	TEXprog = make_shared<Program>();
@@ -408,13 +422,14 @@ static void init()
 	TEXprog->addUniform("MV");
 	TEXprog->addUniform("texture0");
 
-	texture0 = make_shared<Texture>();
-	texture0->setFilename(poses[currPose].srcPic);
-	//texture0->setFilename("./resources/grass2.png");
-	texture0->init();
-	texture0->setUnit(0);
-	texture0->setWrapModes(GL_REPEAT, GL_REPEAT);
-
+	if (objective == "match") {
+		texture0 = make_shared<Texture>();
+		texture0->setFilename(poses[currPose].srcPic);
+		//texture0->setFilename("./resources/grass2.png");
+		texture0->init();
+		texture0->setUnit(0);
+		texture0->setWrapModes(GL_REPEAT, GL_REPEAT);
+	}
 	// If there were any OpenGL errors, this will print something.
 	// You can intersperse this line in your code to find the exact location
 	// of your OpenGL error.
@@ -709,7 +724,7 @@ static void render()
 	Joint bodyJoints[25];
 	getJointData(bodyJoints);
 	// Load Joint data into hierarchy
-	if (bodyJoints[0].Position.X > -1000) {
+	if (curState != MATCHED && bodyJoints[0].Position.X > -1000) {
 		loadJointsIntoHierarchy(bodyJoints, studentRoot, studentJointMap);
 		computeTeacherData();
 	}
@@ -750,9 +765,9 @@ static void render()
 	stack<JointNode*> s;
 	stack<JointNode*> s_t;
 	// FOR TESTING:
-    
-	if(true) {
-	//if (bodyJoints != nullptr) {
+
+	if (true) {
+		//if (bodyJoints != nullptr) {
 		s.push(studentRoot);
 		s_t.push(teacherRoot);
 		while (!s.empty()) {
@@ -764,26 +779,26 @@ static void render()
 			s_t.pop();
 			// Draw student joint
 			MV->pushMatrix();
-				MV->translate(cur->pos);
-				MV->scale(.15, .15, .15);
-				glUniformMatrix4fv(BPprog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
-				glm::mat4 VM = glm::transpose(glm::inverse(MV->topMatrix()));
-				glUniformMatrix4fv(BPprog->getUniform("VM"), 1, GL_FALSE, &VM[0][0]);
-				glUniform3f(BPprog->getUniform("col"), cur->color.r, cur->color.g, cur->color.b);
-				sphere->draw(BPprog);
+			MV->translate(cur->pos);
+			MV->scale(.15, .15, .15);
+			glUniformMatrix4fv(BPprog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
+			glm::mat4 VM = glm::transpose(glm::inverse(MV->topMatrix()));
+			glUniformMatrix4fv(BPprog->getUniform("VM"), 1, GL_FALSE, &VM[0][0]);
+			glUniform3f(BPprog->getUniform("col"), cur->color.r, cur->color.g, cur->color.b);
+			sphere->draw(BPprog);
 			MV->popMatrix();
 			BPprog->unbind();
 			// Draw teacher joint
 			prog->bind();
 			glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, &P->topMatrix()[0][0]);
 			MV->pushMatrix();
-				MV->translate(cur_t->pos);
-				MV->translate(0, 0, -.5);
-				MV->scale(.15, .15, .15);
-				glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
-				glUniform3f(prog->getUniform("col"), 200.f, 200.f, 200.f);
-				glUniform1f(prog->getUniform("alpha"), 1.f);
-				sphere->draw(prog);
+			MV->translate(cur_t->pos);
+			MV->translate(0, 0, -.5);
+			MV->scale(.15, .15, .15);
+			glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
+			glUniform3f(prog->getUniform("col"), 200.f, 200.f, 200.f);
+			glUniform1f(prog->getUniform("alpha"), 1.f);
+			sphere->draw(prog);
 			MV->popMatrix();
 			prog->unbind();
 			// Draw limbs between joints
@@ -797,7 +812,7 @@ static void render()
 				s_t.push(x_t->node);
 				x->node->color = getColor(x->norm, x_t->norm);
 				float tmp_grade = getGrade(x->norm, x_t->norm);
-				
+
 				grade_sum += tmp_grade;
 				if (tmp_grade < grade_min) {
 					if (!(x->node->type == JointType_ThumbLeft || x->node->type == JointType_ThumbRight)) {
@@ -806,32 +821,32 @@ static void render()
 						cout << "tmp_grade: " << tmp_grade << " type: " << grade_min_type << "\n";
 					}
 				}
-				
+
 				MV->pushMatrix();
-					MV->translate(cur->pos);
-					MV->rotate(glm::acos(glm::dot(glm::vec3(0, 1, 0), x->norm)), glm::cross(glm::vec3(0, 1, 0), x->norm));
-					MV->translate(glm::vec3(0, x->length / 2.f, 0));
-					MV->scale(glm::vec3(0.08, x->length, 0.08));
-					glUniformMatrix4fv(BPprog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
-					glm::mat4 VM = glm::transpose(glm::inverse(MV->topMatrix()));
-					glUniformMatrix4fv(BPprog->getUniform("VM"), 1, GL_FALSE, &VM[0][0]);
-					glUniform3f(BPprog->getUniform("col"), x->node->color.r, x->node->color.g, x->node->color.b);
-					shape->draw(BPprog);
+				MV->translate(cur->pos);
+				MV->rotate(glm::acos(glm::dot(glm::vec3(0, 1, 0), x->norm)), glm::cross(glm::vec3(0, 1, 0), x->norm));
+				MV->translate(glm::vec3(0, x->length / 2.f, 0));
+				MV->scale(glm::vec3(0.08, x->length, 0.08));
+				glUniformMatrix4fv(BPprog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
+				glm::mat4 VM = glm::transpose(glm::inverse(MV->topMatrix()));
+				glUniformMatrix4fv(BPprog->getUniform("VM"), 1, GL_FALSE, &VM[0][0]);
+				glUniform3f(BPprog->getUniform("col"), x->node->color.r, x->node->color.g, x->node->color.b);
+				shape->draw(BPprog);
 				MV->popMatrix();
 				BPprog->unbind();
 				// Draw teacher limb
 				prog->bind();
 				glUniformMatrix4fv(prog->getUniform("P"), 1, GL_FALSE, &P->topMatrix()[0][0]);
 				MV->pushMatrix();
-					MV->translate(0, 0, -.5);
-					MV->translate(cur_t->pos);
-					MV->rotate(glm::acos(glm::dot(glm::vec3(0, 1, 0), x_t->norm)), glm::cross(glm::vec3(0, 1, 0), x_t->norm));
-					MV->translate(glm::vec3(0, x_t->length / 2.f, 0));
-					MV->scale(glm::vec3(0.08, x_t->length, 0.08));
-					glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
-					glUniform3f(prog->getUniform("col"), 200.f, 200.f, 200.f);
-					glUniform1f(prog->getUniform("alpha"), 1.f);
-					shape->draw(prog);
+				MV->translate(0, 0, -.5);
+				MV->translate(cur_t->pos);
+				MV->rotate(glm::acos(glm::dot(glm::vec3(0, 1, 0), x_t->norm)), glm::cross(glm::vec3(0, 1, 0), x_t->norm));
+				MV->translate(glm::vec3(0, x_t->length / 2.f, 0));
+				MV->scale(glm::vec3(0.08, x_t->length, 0.08));
+				glUniformMatrix4fv(prog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
+				glUniform3f(prog->getUniform("col"), 200.f, 200.f, 200.f);
+				glUniform1f(prog->getUniform("alpha"), 1.f);
+				shape->draw(prog);
 				MV->popMatrix();
 				prog->unbind();
 			}
@@ -863,15 +878,15 @@ static void render()
 		glBindBuffer(GL_ARRAY_BUFFER, qBufIDs["bTex"]);
 		glVertexAttribPointer(TEXprog->getAttribute("aTex"), 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, qBufIDs["bInd"]);*/
-		
+
 		MV->pushMatrix();
-			
-			MV->translate(-2, -2, -2);
-			MV->scale(5);
-			
-			glUniformMatrix4fv(TEXprog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
-			//glDrawElements(GL_TRIANGLES, indCountQ, GL_UNSIGNED_INT, (void*)0);
-			quad->draw(TEXprog);
+
+		MV->translate(-4, -2.5, -2);
+		MV->scale(2);
+
+		glUniformMatrix4fv(TEXprog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
+		//glDrawElements(GL_TRIANGLES, indCountQ, GL_UNSIGNED_INT, (void*)0);
+		quad->draw(TEXprog);
 		MV->popMatrix();
 
 		/*glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -893,19 +908,191 @@ static void render()
 	float grade = 100.0 * grade_sum / 25.0;
 	string grade_out = to_string(grade);
 	grade_out = grade_out.substr(0, 4) + "%";
-	
+
 	glm::vec3 grade_col = getGradeCol(grade);
-	
+
 	Text::renderText(FTprog, grade_out, 0 + 5, height - FONT_HEIGHT - 5, 1, grade_col, VAO, VBO, characters, window);
 	// Render advice
-	glm::vec3 min_grade_col = getGradeCol(grade_min);
-	Text::renderText(FTprog, "Work on your:", width - 125, height/2 + 0.3*FONT_HEIGHT, 0.3, glm::vec3(0, 0, 0), VAO, VBO, characters, window);
-	Text::renderText(FTprog, getJointName(grade_min_type), width - 125, height / 2 , 0.3, glm::vec3(0, 0, 0), VAO, VBO, characters, window);
-	Text::renderText(FTprog, string(to_string(100.f*grade_min).substr(0, 4) + "% Accurate"), width - 125, height / 2 - 0.3*FONT_HEIGHT, 0.3, min_grade_col, VAO, VBO, characters, window);
-	
+	if (curState != MATCHED) {
+		glm::vec3 min_grade_col = getGradeCol(grade_min);
+		Text::renderText(FTprog, "Work on your:", width - 125, height / 2 + 0.3 * FONT_HEIGHT, 0.3, glm::vec3(0, 0, 0), VAO, VBO, characters, window);
+		Text::renderText(FTprog, getJointName(grade_min_type), width - 125, height / 2, 0.3, glm::vec3(0, 0, 0), VAO, VBO, characters, window);
+		Text::renderText(FTprog, string(to_string(100.f * grade_min).substr(0, 4) + "% Accurate"), width - 125, height / 2 - 0.3 * FONT_HEIGHT, 0.3, min_grade_col, VAO, VBO, characters, window);
+	}
+	else {
+		
+	}
+
+	if (grade >= 80.f) {
+		if(curState == UNMATCHED) {
+			curState = MATCHING;
+			countdown_start = glfwGetTime();
+		}
+		else if (curState == MATCHING) {
+			double elapsedTime = glfwGetTime() - countdown_start;
+			if (grade < 80.f) {
+				curState = UNMATCHED;
+			}
+			else if (elapsedTime >= 3.) {
+				Text::renderText(FTprog, "SUCCESS!", width - 375, 20, 1.5, glm::vec3(0, 1, 0), VAO, VBO, characters, window);
+				curState = MATCHED;
+			}
+			else {
+				Text::renderText(FTprog, to_string(3. - elapsedTime).substr(0, 3), width - 150, 20, 2, glm::vec3(0, 0, 1), VAO, VBO, characters, window);
+			}
+		}
+		else {
+			Text::renderText(FTprog, "SUCCESS!", width - 375, 20, 1.5, glm::vec3(0, 1, 0), VAO, VBO, characters, window);
+		}
+	}
+
 	//MV->popMatrix();
 	prog->unbind();
 	
+
+	// Pop matrix stacks.
+	MV->popMatrix();
+	P->popMatrix();
+
+	GLSL::checkError(GET_FILE_LINE);
+}
+
+void savePose() {
+	ofstream ofs("./resources/" + newPoseName + ".txt", ofstream::out);
+	JointNode* root = studentRoot;
+	stack<JointNode*> s;
+	s.push(root);
+	while (!s.empty()) {
+		JointNode* cur = s.top();
+		s.pop();
+		for (auto* x : cur->limbs) {
+			ofs << x->norm.x << " " << x->norm.y << " " << x->norm.z << "\n";
+			s.push(x->node);
+		}
+	}
+	ofs.close();
+	try {
+		pqxx::connection C("postgres://fwdufwcq:nSMG96HTO2RxWz2E-Iu-WNwkfoFMKnKW@heffalump.db.elephantsql.com/fwdufwcq");
+		if (C.is_open()) {
+			const char* sql;
+			cout << "Opened database succesfully: " << C.dbname() << endl;
+			sql = "SELECT COUNT (*) from poses";
+			pqxx::nontransaction N(C);
+			pqxx::result R(N.exec(sql));
+			N.commit();
+			int numPoses = stoi(R[0][0].c_str());
+			pqxx::nontransaction N2(C);
+			string angles;
+			string query = "Insert into poses (id,name,angles,image) values (" + to_string(numPoses) + ", '" + newPoseName + "', " + "'./resources/" + newPoseName + ".txt'" + ", './resources/unknown.png')";
+			sql = query.c_str();
+			N2.exec(sql);
+			N2.commit();
+		}
+	}
+	catch (const exception& e) {
+		cerr << e.what() << endl;
+		return ;
+	}
+}
+
+void createRender() {
+	// Get Joint data from Kinect
+	Joint bodyJoints[25];
+	getJointData(bodyJoints);
+	// Load Joint data into hierarchy
+	if (curState != MATCHED && bodyJoints[0].Position.X > -1000) {
+		loadJointsIntoHierarchy(bodyJoints, studentRoot, studentJointMap);
+	}
+
+	// Get current frame buffer size.
+	int width = 0, height = 0;
+	glfwGetFramebufferSize(window, &width, &height);
+	float aspect = width / (float)height;
+	glViewport(0, 0, width, height);
+
+	// Clear framebuffer.
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Create matrix stacks.
+	auto P = make_shared<MatrixStack>();
+	auto MV = make_shared<MatrixStack>();
+	// Apply projection.
+	P->pushMatrix();
+	P->multMatrix(glm::perspective((float)(45.0 * M_PI / 180.0), aspect, 0.01f, 100.0f));
+	// Apply camera transform.
+	MV->pushMatrix();
+	MV->translate(glm::vec3(0, 0, -7));
+
+	// Draw mesh using GLSL.
+
+	MV->pushMatrix();
+	stack<JointNode*> s;
+	// FOR TESTING:
+
+	if (true) {
+		//if (bodyJoints != nullptr) {
+		s.push(studentRoot);
+		while (!s.empty()) {
+			BPprog->bind();
+			glUniformMatrix4fv(BPprog->getUniform("P"), 1, GL_FALSE, &P->topMatrix()[0][0]);
+			JointNode* cur = s.top(); // Current Student Joint
+			s.pop();
+			// Draw student joint
+			MV->pushMatrix();
+			MV->translate(cur->pos);
+			MV->scale(.15, .15, .15);
+			glUniformMatrix4fv(BPprog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
+			glm::mat4 VM = glm::transpose(glm::inverse(MV->topMatrix()));
+			glUniformMatrix4fv(BPprog->getUniform("VM"), 1, GL_FALSE, &VM[0][0]);
+			glUniform3f(BPprog->getUniform("col"), cur->color.r, cur->color.g, cur->color.b);
+			sphere->draw(BPprog);
+			MV->popMatrix();
+			// Draw limbs between joints
+			for (int i = 0; i < cur->limbs.size(); ++i) {
+				// Draw student limb
+				glUniformMatrix4fv(BPprog->getUniform("P"), 1, GL_FALSE, &P->topMatrix()[0][0]);
+				auto* x = cur->limbs[i];
+				s.push(x->node);
+				x->node->color = glm::vec3(0, 0, 255);
+
+
+				MV->pushMatrix();
+				MV->translate(cur->pos);
+				MV->rotate(glm::acos(glm::dot(glm::vec3(0, 1, 0), x->norm)), glm::cross(glm::vec3(0, 1, 0), x->norm));
+				MV->translate(glm::vec3(0, x->length / 2.f, 0));
+				MV->scale(glm::vec3(0.08, x->length, 0.08));
+				glUniformMatrix4fv(BPprog->getUniform("MV"), 1, GL_FALSE, &MV->topMatrix()[0][0]);
+				glm::mat4 VM = glm::transpose(glm::inverse(MV->topMatrix()));
+				glUniformMatrix4fv(BPprog->getUniform("VM"), 1, GL_FALSE, &VM[0][0]);
+				glUniform3f(BPprog->getUniform("col"), x->node->color.r, x->node->color.g, x->node->color.b);
+				shape->draw(BPprog);
+				MV->popMatrix();
+			}
+		}
+	}
+	//Render title
+	Text::renderText(FTprog, newPoseName, 200, height - FONT_HEIGHT - 5, 1, glm::vec3(0, 0, 0), VAO, VBO, characters, window);
+
+
+	if (curState == UNMATCHED) {
+		curState = MATCHING;
+		countdown_start = glfwGetTime();
+	}
+	else if (curState == MATCHING) {
+		double elapsedTime = glfwGetTime() - countdown_start;
+		if (elapsedTime >= 8.) {
+			Text::renderText(FTprog, "SAVED!", width - 375, 20, 1.5, glm::vec3(0, 1, 0), VAO, VBO, characters, window);
+			curState = MATCHED;
+			savePose();
+		}
+		else {
+			Text::renderText(FTprog, to_string(8. - elapsedTime).substr(0, 3), width - 150, 20, 2, glm::vec3(0, 0, 1), VAO, VBO, characters, window);
+		}
+	}
+	else {
+		Text::renderText(FTprog, "SAVED!", width - 375, 20, 1.5, glm::vec3(0, 1, 0), VAO, VBO, characters, window);
+	}
+
 
 	// Pop matrix stacks.
 	MV->popMatrix();
@@ -1004,7 +1191,10 @@ int test(int selectedPose)
 	while (!glfwWindowShouldClose(window)) {
 		//animation
 		glfwMakeContextCurrent(window);
-		render();
+		if (objective == "match")
+			render();
+		else
+			createRender();
 		glfwSwapBuffers(window);
 
 		//kinect video
@@ -1040,8 +1230,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	int pose = 0;
 	int argc = -1;
 	LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
-	if (argc >= 2) {
-		pose = stoi(argv[1]);
+	if (argc >= 3) {
+		if (wcscmp(L"-c", argv[1]) == 0) {
+			objective = "create";
+			newPoseName = CW2A(argv[2]);
+		}
+		if (wcscmp(L"-m", argv[1]) == 0) {
+			objective = "match";
+			pose = stoi(argv[2]);
+		}	
 	}
 	cout << pose << endl;
 
