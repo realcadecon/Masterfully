@@ -80,12 +80,15 @@ enum MatchState
 	MATCHED
 };
 
+int grades[] = {70, 85, 80, 80, 80, 80, 75, 70, 75, 80, 75, 85};
+
 string objective = "match";
 MatchState curState = UNMATCHED;
 double countdown_start = -1.f;
 
 struct Pose {
 	string name, src, srcPic;
+	int grade = -1;
 
 	Pose(string _name, string _src, string _srcPic) {
 		name = _name;
@@ -740,6 +743,8 @@ static void render()
 	float grade_min = 1.f;
 	JointType grade_min_type = JointType_SpineBase;
 
+	vector<pair<float, JointType>> final_grades;
+
 	// Get current frame buffer size.
 	int width = 0, height = 0;
 	glfwGetFramebufferSize(window, &width, &height);
@@ -822,6 +827,10 @@ static void render()
 					}
 				}
 
+				if (curState == MATCHED) {
+					final_grades.push_back({ tmp_grade, x->node->type });
+				}
+
 				MV->pushMatrix();
 				MV->translate(cur->pos);
 				MV->rotate(glm::acos(glm::dot(glm::vec3(0, 1, 0), x->norm)), glm::cross(glm::vec3(0, 1, 0), x->norm));
@@ -851,6 +860,10 @@ static void render()
 				prog->unbind();
 			}
 		}
+		
+		if (curState == MATCHED)
+			sort(final_grades.begin(), final_grades.end());
+
 		prog->bind();
 		MV->pushMatrix();
 		MV->translate(studentJointMap[grade_min_type]->pos);
@@ -920,20 +933,28 @@ static void render()
 		Text::renderText(FTprog, string(to_string(100.f * grade_min).substr(0, 4) + "% Accurate"), width - 125, height / 2 - 0.3 * FONT_HEIGHT, 0.3, min_grade_col, VAO, VBO, characters, window);
 	}
 	else {
-		
+		Text::renderText(FTprog, "Work on your:", width - 125, height / 2 + 0.3 * FONT_HEIGHT, 0.3, glm::vec3(0, 0, 0), VAO, VBO, characters, window);
+		for (int i = 0; i < 3; ++i) {
+			Text::renderText(FTprog, getJointName(final_grades[i].second), width - 125, height / 2 - i*0.6*FONT_HEIGHT - i*5, 0.3, glm::vec3(0, 0, 0), VAO, VBO, characters, window);
+			Text::renderText(FTprog, string(to_string(100.f * final_grades[i].first).substr(0, 4) + "% Accurate"), width - 125, height / 2 - 0.3 * FONT_HEIGHT - i * 0.6 * FONT_HEIGHT - i * 5, 0.3, getGradeCol(final_grades[i].first), VAO, VBO, characters, window);
+		}
 	}
 
-	if (grade >= 80.f) {
+	float required_grade = 80.f;
+	if (poses[currPose].grade != -1) {
+		required_grade = poses[currPose].grade;
+	}
+	if (grade < required_grade) {
+		curState = UNMATCHED;
+	}
+	if (grade >= required_grade) {
 		if(curState == UNMATCHED) {
 			curState = MATCHING;
 			countdown_start = glfwGetTime();
 		}
 		else if (curState == MATCHING) {
 			double elapsedTime = glfwGetTime() - countdown_start;
-			if (grade < 80.f) {
-				curState = UNMATCHED;
-			}
-			else if (elapsedTime >= 3.) {
+			if (elapsedTime >= 3.) {
 				Text::renderText(FTprog, "SUCCESS!", width - 375, 20, 1.5, glm::vec3(0, 1, 0), VAO, VBO, characters, window);
 				curState = MATCHED;
 			}
@@ -1121,6 +1142,7 @@ int test(int selectedPose)
 				pqxx::result R(N2.exec(sql));
 				N2.commit();
 				Pose temp(R[0][0].c_str(), R[0][1].c_str(), R[0][2].c_str());
+				temp.grade = grades[i];
 				poses.push_back(temp);
 			}
 			currPose = selectedPose;
