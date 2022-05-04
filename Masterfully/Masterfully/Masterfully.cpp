@@ -1122,7 +1122,7 @@ void createRender() {
 	GLSL::checkError(GET_FILE_LINE);
 }
 
-int test(int selectedPose)
+int test(int selectedPose, string pose_name)
 {
 	try {
 		pqxx::connection C("postgres://fwdufwcq:nSMG96HTO2RxWz2E-Iu-WNwkfoFMKnKW@heffalump.db.elephantsql.com/fwdufwcq");
@@ -1146,6 +1146,13 @@ int test(int selectedPose)
 				poses.push_back(temp);
 			}
 			currPose = selectedPose;
+		}
+		if (selectedPose == -1) {
+			for (int i = 0; i < poses.size(); ++i) {
+				if (poses[i].name == pose_name) {
+					currPose = i;
+				}
+			}
 		}
 	}
 	catch(const exception& e){
@@ -1250,6 +1257,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // TODO: Place code here.
 	int pose = 0;
+	string pose_name = "";
 	int argc = -1;
 	LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 	if (argc >= 3) {
@@ -1261,6 +1269,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			objective = "match";
 			pose = stoi(argv[2]);
 		}	
+		if (wcscmp(L"-cn", argv[1]) == 0) {
+			objective = "match";
+			pose = -1;
+			pose_name = CW2A(argv[2]);
+		}
 	}
 	cout << pose << endl;
 
@@ -1303,7 +1316,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	cout << "test" << endl;
 	cerr << "test" << endl;
 
-	test(pose);
+	test(pose, pose_name);
 
     // Initialize global strings
     //LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
