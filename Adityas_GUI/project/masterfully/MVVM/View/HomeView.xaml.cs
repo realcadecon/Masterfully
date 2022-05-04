@@ -22,6 +22,7 @@ namespace Masterfully.MVVM.View
     /// </summary>
     public partial class HomeView : UserControl
     {
+
         public HomeView()
         {
             InitializeComponent();
@@ -178,6 +179,33 @@ namespace Masterfully.MVVM.View
             // Configure the process using the StartInfo properties.
             process.StartInfo.FileName = path + "/Skeleton.exe";
             process.StartInfo.Arguments = "-m 4";
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            process.Start();
+            process.WaitForExit();// Waits here for the process to exit.
+        }
+
+        private void CreateDanceButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Run Skeleton.
+            string path = Directory.GetCurrentDirectory();
+            Process process = new Process();
+            // Configure the process using the StartInfo properties.
+            process.StartInfo.FileName = path + "/Skeleton.exe";
+            process.StartInfo.Arguments = "-c " + poseText.Text;
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+            process.Start();
+            process.WaitForExit();// Waits here for the process to exit.
+        }
+
+        private void CustomDanceButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Run Skeleton.
+            string path = Directory.GetCurrentDirectory();
+            Process process = new Process();
+            // Configure the process using the StartInfo properties.
+            process.StartInfo.FileName = path + "/Skeleton.exe";
+            process.StartInfo.Arguments = "-mn " + poseText.Text;
+            Console.WriteLine(process.StartInfo.Arguments);
             process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
             process.Start();
             process.WaitForExit();// Waits here for the process to exit.

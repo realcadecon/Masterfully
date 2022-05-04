@@ -5,13 +5,24 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Masterfully.MVVM.View"
              mc:Ignorable="d" 
-             d:DesignHeight="660" d:DesignWidth="800">
+             d:DesignHeight="660" d:DesignWidth="900">
     <StackPanel>
-        <TextBlock Text="Movements"
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Movements"
                    Foreground="#EEEEEE"
                    FontSize="28"
                    HorizontalAlignment="Left"
-                   Margin="0,0,0,20"/>
+                   Margin="0,0,0,20" Width="413"/>
+            <TextBox x:Name="poseText"
+                       Width="245"
+                       Height="29"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       Margin="5"
+                       Padding="5"
+                       Text="Pose Name" Background="#FFD8D2CB"
+                       />
+        </StackPanel>
 
         <StackPanel Orientation="Horizontal"
                     Margin="0,0,0,10">
@@ -33,13 +44,9 @@
 
                 <Grid>
                     <StackPanel>
-                        <TextBlock Text="Recent Movement"
+                        <TextBlock Text="Create a Movement"
                                    Foreground="#EEEEEE"
                                    FontSize="28"
-                                   Margin="20,10,10,0"/>
-                        <TextBlock Text="'Name of Movement'"
-                                   Foreground="#EEEEEE"
-                                   FontSize="18"
                                    Margin="20,10,10,0"/>
                     </StackPanel>
 
@@ -60,10 +67,10 @@
                     </Image>
 
                     <Button Cursor="Hand"
-                            x:Name="RecentDanceButton"
+                            x:Name="CreateDanceButton"
                             BorderBrush="Transparent"
                             Background="Transparent"
-                            Foreground="Transparent">
+                            Foreground="Transparent" Click="CreateDanceButton_Click">
                         <Button.Resources>
                             <Style TargetType="{x:Type Border}">
                                 <Setter Property="CornerRadius" Value="10"/>
@@ -94,21 +101,22 @@
 
                 <Grid>
                     <StackPanel>
-                        <TextBlock Text="Suggested&#x0a;Movement"
+                        <TextBlock Text="Custom"
                                    Foreground="#EEEEEE"
                                    FontSize="28"
                                    Margin="20,10,10,0"/>
-                        <TextBlock Text="'Name of Movement'"
+                        <TextBlock Text="Movement"
                                    Foreground="#EEEEEE"
-                                   FontSize="18"
+                                   FontSize="28"
                                    Margin="20,10,10,0"/>
                     </StackPanel>
 
                     <Button Cursor="Hand"
-                            x:Name="SuggestedDanceButton"
+                            x:Name="CustomDanceButton"
                             BorderBrush="Transparent"
                             Background="Transparent"
-                            Foreground="Transparent">
+                            Foreground="Transparent"
+                            Click="CustomDanceButton_Click">
                         <Button.Resources>
                             <Style TargetType="{x:Type Border}">
                                 <Setter Property="CornerRadius" Value="10"/>

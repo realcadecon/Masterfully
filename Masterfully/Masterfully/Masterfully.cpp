@@ -1269,7 +1269,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			objective = "match";
 			pose = stoi(argv[2]);
 		}	
-		if (wcscmp(L"-cn", argv[1]) == 0) {
+		if (wcscmp(L"-mn", argv[1]) == 0) {
 			objective = "match";
 			pose = -1;
 			pose_name = CW2A(argv[2]);

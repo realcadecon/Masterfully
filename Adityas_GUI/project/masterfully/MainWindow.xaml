@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Masterfully"
         xmlns:viewModel="clr-namespace:Masterfully.MVVM.ViewModel"
         mc:Ignorable="d"
-        Height="750" Width="920"
+        Height="750" Width="1000"
         WindowStyle="None"
         ResizeMode="NoResize"
         Background="Transparent"
@@ -69,7 +69,7 @@
                        HorizontalAlignment="Left"
                        Margin="5"
                        Grid.Column="1"
-                       Style="{StaticResource SearchBar}"/>
+                       Style="{StaticResource SearchBar}" Background="#FF252526"/>
 
             <ContentControl Grid.Row="1"
                             Grid.Column="1"
